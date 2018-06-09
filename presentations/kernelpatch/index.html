@@ -1,0 +1,233 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+			<img src="images/tux.png"/>
+			<h3>Make your first linux kernel patch</h3>	
+			</section>
+		<section>
+			<section>
+			<h3>Linux kernel</h3>
+			<ul>
+				<li class="fragment">One of the largest free software projects</li>
+				<li class="fragment">Powers credit-card sized computers to supercomputers</li>
+				<li class="fragment">Developers from all over the world collaborate</li>
+			</ul>
+			</section>
+			<section>
+			<h3>How is it developed?</h3>
+			<ul>
+				<li class="fragment">Developers send code changes by mail</li>
+				<li class="fragment">Divided into subsystems</li>
+				<li class="fragment">Every subsystems has maintainers</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Kernel development cycle</h3>
+			Released every 2-3 months<br>
+			<span class="fragment">
+			<img src="images/kernel-cycle.jpg"/><br>
+			<small>Images source: <a href="https://www.slideshare.net/ennael/kernel-recipes-2015-the-stable-linux-kernel-tree-10-years-of-insanity">Greg KH</a></small>
+			</span>
+			</section>
+			<section>
+			<h4>What is a patch?</h4>
+			<img class="fragment" src="images/patch.png"/>	
+			</section>
+		</section>	
+		<section>
+			<section>
+				<h3>Checkpatch errors</h3>
+				<ul>
+					<li class="fragment">Coding style errors</li>
+					<li class="fragment">Found using checkpatch.pl</li>
+					<li class="fragment">Entry point for new contributors</li>
+				</ul>
+			</section>
+			<section>
+				<h4>ERROR: that open brace { should be on the previous line</h4>
+				<pre><code class="c">
+if ((RALINK_PCI0_STATUS & 0x1) == 0)
+{
+	printk("PCIE0 no card, disable it(RST&CLK)\n");
+	ASSERT_SYSRST_PCIE(RALINK_PCIE0_RST);
+	//...
+}
+				</code></pre>
+				<span class="fragment">Correct style
+				<pre><code class="c">
+if ((RALINK_PCI0_STATUS & 0x1) == 0){
+	printk("PCIE0 no card, disable it(RST&CLK)\n");
+	ASSERT_SYSRST_PCIE(RALINK_PCIE0_RST);
+	//...
+}
+				</code></pre>
+				</span>
+			</section>
+			<section>
+				<h4>ERROR: space required before the open parenthesis '('</h4>
+				<pre><code class="c">
+if(reg <= 5 && reg >= 3) {
+	//..
+}
+				</code></pre>
+				<span class="fragment">Correct style
+				<pre><code class="c">
+if (reg <= 5 && reg >= 3) {
+	//..
+}
+				</code></pre>
+				</span>
+			</section>
+			<section>
+				<h3>Staging directory</h3>
+				<ul>
+					<li class="fragment">drivers/staging</li>
+					<li class="fragment">Nursery for drivers</li>
+					<li class="fragment">Contains drivers under development</li>
+					<li class="fragment">Recommended for new contributors</li>
+				</ul>
+			</section>
+		</section>
+		<section>
+			<section>
+				<h3>Enough talk. Let's start</h3>
+			</section>
+			<section>
+				<h3>1. Set up tools</h3>
+				<ul>
+					<li class="fragment">Configure your editor</li>
+					<li class="fragment">Set up Git</li>
+					<li class="fragment">Install an email client<br>
+						<small>Read <a href="https://elixir.bootlin.com/linux/latest/source/Documentation/process/email-clients.rst">Documenetation/process/email-clients.rst</a></small>
+					</li>
+					<li class="fragment">Install and set up git send-email</li>
+					<li class="fragment">Check out <a href="https://kernelnewbies.org/FirstKernelPatch">Kernelnewbies.org/FirstKernelPatch</a> for instructions</li>
+				</ul>
+			</section>
+			<section>
+				<h3>2. Get the source code</h3>
+				<span class="fragment">
+				<h5>Mainline kernel tree</h5>
+				<pre><code class="bash">
+git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+				</code></pre>
+				</span>
+				<span class="fragment">
+				<h5>Staging tree</h5>
+				<pre><code class="bash">
+git clone git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/staging.git
+				</code></pre>
+				</span>
+				<small class="fragment">Checkout <a href="https://elixir.bootlin.com/linux/latest/source/Documentation/process">Documentation/process</a></small>
+			</section>
+			<section>
+				<h3>3. Compile the kernel</h3>
+				<pre><code class="bash">
+make oldconfig
+make -j2
+				</code></pre>
+			</section>
+			<section>
+				<h3>4. Pull from staging-next and Create a branch</h3>
+				<pre><code class="bash">
+git branch -a
+git branch staging-next
+git checkout staging-next
+git pull origin staging-next
+git checkout -b new staging-next
+				</code></pre>
+			</section>
+			<section>
+				<h3>5. Use checkpatch to find bugs and fix them</h3>
+				<pre><code class="bash">
+./scripts/checkpatch.pl -f drivers/staging/some_driver/some_file.c
+				</code></pre>
+			</section>
+			<section>
+				<h3>6. Commit the changes</h3>
+				<pre><code class="bash">
+git diff
+git add drivers/staging/some_driver/some_file.c
+git commit -s -v
+git log --oneline
+				</code></pre>
+			</section>
+			<section>
+				<h3>7. Generate the patch</h3>
+				<pre><code class="bash">
+git format-patch staging-next..new
+				</code></pre>
+			</section>
+			<section>
+				<h3>8. Check for errors</h3>
+				<ul>
+					<li class="fragment">Build the driver
+					<pre><code class="bash">
+make M=drivers/staging/driver_name
+					</code></pre>
+					</li>
+					<li class="fragment">Use checkpatch
+					<pre><code class="bash">
+./scripts/checkpatch.pl your_patch.patch
+					</code></pre>
+					</li>
+					<li class="fragment">Test on real hardware (if possible)</li>
+				</ul>
+			</section>
+			<section>
+				<h3>9. Find whom to send to</h3>
+				<pre><code class="bash">
+./scripts/get_maintainer.pl drivers/staging/some_driver/some_file.c
+				</code></pre>
+			</section>
+			<section>
+				<h3>10. Send patch</h3>
+				<pre><code class="bash">
+git send-email --to someone@something.com --cc somelist@something.com your_patch.patch
+				</code></pre>
+			</section>
+			<section>
+				<h3>Celebrate</h3>
+			</section>
+		</section>
+		<section>
+			<section>
+			<h3>So, I made my first patch. Now what?</h3>
+			<ul>
+				<li class="fragment">Do a patchset</li>
+				<li class="fragment"><a href="http://eudyptula-challenge.org/">Eudyptula challenge</a></li>
+				<li class="fragment"><a href="https://lkcamp.gitlab.io/">Linux kernel camp</a></li>
+				<li class="fragment"><a href="https://summerofcode.withgoogle.com/about/">Google Summer of Code</a>, <a href="https://www.outreachy.org/">Outreachy</a>, ..</li>
+			</ul>
+			</section>
+			<section>
+			<h3>So, I made my first patch. Now what? (contd.)</h3>
+			<ul>
+				<li class="fragment">Checkout TODO files</li>
+				<li class="fragment">Find bugs using other static checking tools (Sparse, Coccinelle, Smatch)</li>
+				<li class="fragment">Find unsupported hardware and write a driver for it</li>
+			</ul>
+			</section>
+		</section>
+		<section>
+			<section>
+				<h2>Questions?</h2>
+			</section>
+			<section>
+				<h2>Thank you</h2>
+			</section>
+		</section>
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>
