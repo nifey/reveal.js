@@ -1,0 +1,15 @@
+#!/sbin/bpftrace
+/*
+ * This is just a simple hello world program
+ * BEGIN and END are special probes that get executed at the beginning and at the end
+ *
+ * To view the Compiled BPF code use the -v flag
+ * sudo bpftrace -v
+ */
+BEGIN {
+	printf("Hello world\n");
+}
+
+END {
+	printf("Bye");
+}

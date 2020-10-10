@@ -1,0 +1,34 @@
+/*
+ * This program counts the system calls executed on the system using count()
+ * It also demonstrates the use of associative arrays
+ * BPFtrace by default prints all global variables
+ */
+
+tracepoint:raw_syscalls:sys_enter {
+	@syscount[args->id] = count();
+}
+
+/*
+ * We can instead print it at the end
+ * The following code prints the top 10 syscalls
+ */
+//END {
+//	print(@syscount, 10);
+//	clear(@syscount);
+//}
+
+/*
+ * The interval probe allows us to periodically print stats
+ * The following code prints the syscount every 2 seconds
+ */
+//interval:s:2 {
+//	print(@syscount, 5);
+//	clear(@syscount);
+//	printf("------\n");
+//}
+
+/*
+ * The BPFtrace program outputs the syscall id
+ * To find the syscall name use
+ * $ausyscall syscall_id
+ */

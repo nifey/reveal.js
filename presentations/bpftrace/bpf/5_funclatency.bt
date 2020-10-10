@@ -1,0 +1,38 @@
+/*
+ * This program demonstrates how we can find the time taken for function execution
+ */
+
+kprobe:handle_mm_fault {
+	/*
+	 * nsecs is an inbuilt variable that gives the time in nanoseconds
+	 * We use thread id tid as the key here
+	 */
+	@start[tid] = nsecs;
+}
+
+kretprobe:handle_mm_fault /@start[tid]/ {
+	$diff = nsecs - @start[tid];
+
+	/*
+	 * we can create histograms of values using inbuilt functions
+	 * The following line shows an exponential histogram
+	 */
+	//@latency = hist($diff);
+
+	/*
+	 * The following line shows a linear histogram
+	 */
+	//@latency = lhist($diff, 0, 10000, 1000);
+
+	/*
+	 * we can also use if else
+	 * Here we are using if else to classify low and high latency
+	 */
+	//if ($diff > 2048) {
+	//	@high_latency = count();
+	//} else {
+	//	@low_latency = count();
+	//}
+
+	delete(@start[tid]);
+}

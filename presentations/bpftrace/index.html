@@ -1,0 +1,235 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="../../css/reveal.css" />
+    <link rel="stylesheet" href="../../css/theme/simple.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h3>Profiling with BPFTrace</h3>
+        </section>
+        <section>
+          <section>
+            <h3>BPF</h3>
+            <ul>
+              <li class="fragment">
+                Stands for Berkeley Packet Filter
+              </li>
+              <li class="fragment">
+                Initially used for Network Packet filtering
+              </li>
+	      <li class="fragment">
+		Extended to become enhanced BPF (eBPF)
+	      </li>
+              <li class="fragment">
+                Bytecode that executes on a VM inside the kernel
+              </li>
+              <li class="fragment">
+                Used for profiling, tracing, monitoring and packet filtering
+              </li>
+              <li class="fragment">
+                Allows us to observe the interaction of the kernel and user applications while running
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h3>BPF Programs</h3>
+            <ul>
+              <li class="fragment">
+                Has to be verified before execution
+		<ul>
+			<li class="fragment">Must terminate (Finite complexity)</li>
+			<li class="fragment">Limit on the bpf instruction count</li>
+			<li class="fragment">Should not use uninitialized variables</li>
+			<li class="fragment">etc..</li>
+		</ul>
+              </li>
+              <li class="fragment">
+		Triggerred by events (like tracepoints, kprobes, etc)
+              </li>
+              <li class="fragment">
+		Can communicate to userspace through BPF Maps
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h3>BPF Architecture</h3>
+	    <img style="width:70%" src="images/bpf.svg"/>
+          </section>
+          <section>
+            <h3>Advantages of BPF over other tracing tools</h3>
+	    <ul>
+		    <li class="fragment">Reduced number of context switches</li>
+		    <li class="fragment">Overheads of monitoring is less</li>
+		    <li class="fragment">No need to use kernel modules</li>
+		    <li class="fragment">Netflix, Facebook use BPF programs in production</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>How to write BPF programs</h3>
+            <ul>
+              <li class="fragment">
+		<a href="https://github.com/iovisor/bcc">
+                  BCC (BPF Compiler Collections)
+		</a>
+		<ul>
+			<li>Allows embedding C-like code in Python, C++, etc</li>
+			<li>Useful for creating full-fledged tools</li>
+		</ul>
+              </li>
+              <li class="fragment">
+		<a href="https://github.com/iovisor/bpftrace">BPFTrace</a>
+              </li>
+              <li class="fragment">
+		Libraries in Go, C++ and Rust
+              </li>
+            </ul>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h3>BPFtrace</h3>
+            <ul>
+              <li class="fragment">
+		      Useful for writing quick one liners that compiles to BPF
+              </li>
+              <li class="fragment">
+		      BPFtrace programs have a syntax similar to C and Awk
+              </li>
+              <li class="fragment">
+		      Unlike BCC, BPFtrace takes care of communication using BPF maps
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h3>BPFtrace Program Syntax</h3>
+	    <pre><code>
+probe [, probe, ... ] / filter / { action }
+	    </code></pre>
+          </section>
+          <section>
+            <h3>Probes</h3>
+	    <ul>
+              <li class="fragment">
+		      Events that trigger execution of BPF programs
+              </li>
+              <li class="fragment">
+		      Tracepoints
+		      <ul style="font-size:24" >
+			      <li class="fragment">Points in the kernel code</li>
+			      <li class="fragment">Eg: Syscalls, exceptions, etc</li>
+			      <li class="fragment"><code>sudo ls /sys/kernel/debug/tracing/events</code></li>
+		      </ul>
+              </li>
+              <li class="fragment">
+		      kprobes and kretprobes
+		      <ul style="font-size:24" >
+			      <li class="fragment">Kernel functions</li>
+			      <li class="fragment">Can be used to obtain the arguments passed</li>
+		      </ul>
+              </li>
+              <li class="fragment">
+		      uprobes
+		      <ul style="font-size:24" >
+			      <li class="fragment">User defined probes in executables</li>
+		      </ul>
+              </li>
+              <li class="fragment">
+		      <code>sudo bpftrace -l</code> lists probes
+              </li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Filter</h3>
+	    <ul>
+              <li class="fragment">
+		      Allows us to filter out events
+              </li>
+              <li class="fragment">
+		      Eg: Limit to syscalls of PID 2
+              </li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Action</h3>
+	    <ul>
+              <li class="fragment">
+		      Print messages using printf
+              </li>
+              <li class="fragment">
+		      Count occurrences of events
+              </li>
+              <li class="fragment">
+		      Show histogram of values
+              </li>
+              <li class="fragment">
+		      Print stack traces
+              </li>
+              <li class="fragment">
+		      Measure latency
+              </li>
+	    </ul>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h3>Demo</h3>
+          </section>
+	  <section>
+            <h3>Files used in the demonstration</h3>
+	    <ul>
+		    <li><a href="bpf/Agenda">Agenda</a></li>
+		    <li><a href="bpf/1_hello_world.bt">Hello world</a></li>
+		    <li><a href="bpf/2_syscall.bt">Print arguments of system calls</a></li>
+		    <li><a href="bpf/3_count.bt">Count system calls</a></li>
+		    <li><a href="bpf/4_kprobe.bt">Kprobe</a></li>
+		    <li><a href="bpf/5_funclatency.bt">Calculating kernel function latency</a></li>
+	    </ul>
+	  </section>
+          <section>
+            <h3>Probes overview</h3>
+	    <img style="width:80%" src="images/probes.png" />
+          </section>
+          <section>
+            <h3>Other BPF tools</h3>
+	    <img src="images/tools.png" />
+          </section>
+        </section>
+        <section>
+          <section>
+            <h2>Thank you</h2>
+            <h2>Questions?</h2>
+          </section>
+          <section>
+	    <h3>Links</h3>
+	    <ul>
+	      <li><a href="https://ebpf.io/">https://ebpf.io</a></li>
+              <li>
+		<a href="https://github.com/iovisor/bcc">
+                  BCC (BPF Compiler Collections)
+		</a>
+              </li>
+              <li>
+		  <a href="https://github.com/iovisor/bpftrace">BPFTrace</a>
+              </li>
+              <li>
+		  <a href="https://github.com/iovisor/bpftrace/blob/master/docs/reference_guide.md">BPFTrace Reference</a>
+              </li>
+              <li>
+		  <a href="https://github.com/iovisor/bpftrace/blob/master/docs/tutorial_one_liners.md">BPFTrace One-liners Reference</a>
+              </li>
+              <li>
+		  <a href="http://www.brendangregg.com/ebpf.html">Blog post on eBPF tracing tools</a>
+              </li>
+	    </ul>
+          </section>
+        </section>
+      </div>
+    </div>
+    <script src="../../js/reveal.js"></script>
+    <script>
+      Reveal.initialize();
+    </script>
+  </body>
+</html>

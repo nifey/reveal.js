@@ -1,0 +1,27 @@
+/*
+ * This program demostrate attaching to syscall probes
+ * It also demostrate how we can print the arguments passed in system calls
+ * It also shows the use of inbuilt variables like pid, comm, etc
+ */
+
+tracepoint:syscalls:sys_enter_write /comm != "bpftrace"/ {
+	//printf("Syscall write entered\n");
+	
+	/*
+	 * Inbuilt variables in BPFtrace: pid, comm, cpu
+	 */
+	//printf("Write %d %s on cpu %d\n", pid, comm, cpu);
+
+	/*
+	 * To view all arguments associated with probe
+	 * $bpftrace -lv tracepoint:name
+	 *
+	 * To print arguments of syscall we use args->argument_name
+	 */
+	//printf("%d %s\n", args->fd, comm);
+
+	/*
+	 * To print strings use str()
+	 */
+	//printf("%s > %s\n", str(args->buf), comm);
+}

@@ -1,0 +1,25 @@
+1. Hello world
+  - show bpf code using -v
+  - standalone executables using #!
+2. Syscall
+  - printing inbuilt variables
+  - show arguments using bpftrace -lv
+  - printing syscall arguments
+  - filtering
+3. Syscall counting
+  - counting
+  - Variables
+  - Associative arrays or maps
+  - commandline arguments
+  - interval
+4. kprobe
+  - kprobe
+  - kretprobe
+  - using kernel structs definitions
+  - Function arguments
+  - kstack trace
+5. Funclatency
+  - histogram
+  - lhistogram
+  - time
+  - if else
