@@ -1,0 +1,116 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+		<section>
+			<section>
+			<h3>RiCH: Implementing Reductions in Cache Hierarchy</h3>	
+			<p>Vladimir Dimić&sup1;&ensp;Miquel Moretó&sup1;&ensp;Marc Casas&sup1;<br/>Jan Ciesko&sup2;&ensp;Mateo Valero&sup1;</p>
+			<small>&sup1;Barcelona Supercomputing Center</small>
+			<small>&sup2;Sandia National Laboratories, USA</small>
+			</section>
+			<section>
+			<h3>Problem: Making reductions faster</h3>
+			<ul>
+				<li>Reductions are common operation in HPC</li>
+				<li>Eg: Sum, Min, Max, Logical ops, etc</li>
+				<li>Two types
+			<ul>
+				<li>Reduction over scalar types, Eg: Sum</li>
+				<li>Reduction over vector types, Eg: Histogram</li>
+			</ul>
+			</ul>
+			</section>
+			<section>
+			<h3>Existing approaches</h3>
+			<dl class="fragment">
+				<dt>Privatization</dt>
+				<dd>
+				<ul>
+					<li>Works well for small reduction variables</li>
+					<li>Cache pollution for large reduction variable</li>
+				<ul>
+				</dd>
+				<dt>Atomics</dt>
+				<dd>
+				<ul>
+				<li>Works well for larger reduction variables</li>
+				<li>Cache coherence invalidations and False sharing</li>
+				</ul>
+				</dd>
+			</dl>
+			<h3 class="fragment">Shortcomings of existing work</h3>
+			<ul class="fragment">
+				<li>Doesn't work well for vector reduction variables</li>
+				<li>Modifies ISA =&gt; Libraries need to be modified</li>
+				<li>Modifies cache coherence protocol =&gt; Hard to verify</li>
+			</ul>
+			</section>
+			<section>
+			<h3>RiCH</h3>
+			<ul class="fragment">
+				<li>Runtime assisted Hardware solution</li>
+				<li>Offloads reductions from CPU core to reduction module</li>
+				<li>Allows programmer to control cache pollution by annotating where to perform reduction</li>
+			</ul>
+			<h3 class="fragment">Advantages</h3>
+			<ul class="fragment">
+				<li>Load modify store instructions performed together</li>
+				<li>Does not suffer from coherence effects</li>
+				<li>Updation at higher cache levels reduced cache pollution</li>
+			</ul>
+			</section>
+		</section>
+		<section>
+			<section>
+			<h3>Machine-agnostic and Communication aware Designs for MPI on Emerging Architectures</h3>	
+			<p>
+Jahanzeb Maqbool Hashmi&sup1;&ensp;
+Shulei Xu&sup1;&ensp;
+Bharath Ramesh&sup1;&ensp;
+Mohammadreza Bayatpour&sup1;&ensp;
+Hari Subramoni&sup1;&ensp;
+Dhabaleswar K. DK Panda&sup1;&ensp;
+			</p>
+<small>&sup1;The Ohio State University</small>
+			</section>
+			<section>
+			<h3>Problem</h3>
+			<ul class="fragment">
+				<li>MPI runtimes use Static policies for Rank to core mapping</li>
+				<li>Allows specifying arbitrary mapping =&gt; Burden on Application Developer</li>
+				<li>"How can we redesign MPI runtimes to accurately construct physical to virtual hardware topologies for any given architecture?"</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Proposed approach</h3>
+			<ol>
+				<li class="fragment">Construct an Architecture graph
+					<ul><li>Measures cache invalidation time across all threads (Benchmark based approach)</li>
+						<li>Only done once</li>
+					</ul>
+				</li>
+				<li class="fragment">Construct the Communication graph
+					<ul>
+						<li>consider only two sided calls</li>
+						<li>Uses MPI_T interface</li>
+						<li>Measures frequency and volume of data communicated</li>
+					</ul>
+				</li>
+				<li class="fragment">Do the Mapping taking both latency and memory requirement into account
+				</li>
+			</ol>
+			</section>
+		</section>
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>

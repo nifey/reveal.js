@@ -1,0 +1,172 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+		<section>
+			<section>
+			<h3>CSALT: Context Switch Aware Large TLB</h3>	
+			<p>Yashwant Marathe&sup1;&ensp;Nagendra Gulur&sup2;&ensp;</br>Jee Ho Ryoo&sup1;&ensp;Shuang Song&sup1;&ensp;</br>Lizy K. John&sup1;&ensp;</p>
+			<small>&sup1;University of Texas at Austin</small>
+			<small>&sup2;Texas Instruments</small>
+			</section>
+			<section>
+			<h3>Context Switching in Virtualized systems</h3>
+			<ul>
+				<li class="fragment">TLB misses are costly due to 2D page walk</li>
+				<li class="fragment">Causes increase in TLB misses</li>
+				<li class="fragment">Also causes Data cache contention</li>
+				<li class="fragment">ASIDs are not effective for applications with large memory footprint</li>
+				<li class="fragment">Over 6x increase in TLB MPKI for 2 VM contexts</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Cache effects of Address translation</h3>
+			<ul>
+				<li class="fragment">Regions of Page tables are cached</li>
+				<li class="fragment">Can cause Data cache contention</li>
+				<li class="fragment">In POM TLB, parts of TLB are cached</li>
+				<li class="fragment">In their experiments, on an average 60% of L2 and L3 cache has TLB entries</li>
+				<li class="fragment">Cache occupancy of TLB entries are more for Applications with high TLB misses</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Data and Page table cache lines</h3>
+			<ul>
+				<li class="fragment">Replacement policy does not differentiate</li>
+				<li class="fragment">Impacts system performance differently</li>
+				<li class="fragment">Data misses can be overlapped</li>
+				<li class="fragment">TLB misses are blocking</li>
+				<li class="fragment">Context switches will affect both cache lines</li>
+			</ul>
+			</section>
+		</section>
+		<section>
+			<section>
+			<h3>POM TLB</h3>
+			<ul>
+				<li class="fragment">Virtualized systems need Large TLB capacity</li>
+				<li class="fragment">So Use a Part Of Memory as TLB =&gt; POM TLB</li>
+				<li class="fragment">POM TLB is addressible</li>
+				<li class="fragment">So can be cached</li>
+			</ul>
+			</section>
+			<section>
+			<h3>CSALT: Context Switch Aware Large TLB</h3>
+			<ul>
+				<li class="fragment">TLB-aware Cache Way paritioning scheme</li>
+				<li class="fragment">Works on Top of POM TLB</li>
+				<li class="fragment">Tries to minimize interference between Data and TLB cache lines</li>
+				<li class="fragment">Propose 2 cache partitioning algorithms: CSALT-D and CSALT-CD</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Dynamic Way partitioning</h3>
+			<ul>
+				<li class="fragment">Partition ways for Data and TLB</li>
+				<li class="fragment">Modifies allocation every Epoch</li>
+				<li class="fragment">Need Heuristics to select configurations</li>
+				<li class="fragment">Differentiate Data and TLB
+					<ul>
+						<li class="fragment">Using 1 bit cache metadata</li>
+						<li class="fragment">Using Address range of POM TLB</li>
+					</ul>
+				</li>
+				<li class="fragment">Cache access checks all ways but evict from allocated range</li>
+			</ul>
+			</section>
+			<section>
+			<h3>CSALT-D</h3>
+			<ul>
+				<li class="fragment">Maintain LRU stack counters</li>
+				<li class="fragment">Based on Mattson's Stack Distance Algorithm</li>
+				<li class="fragment">On every hit, corresponding LRU counter is incremented</li>
+				<li class="fragment">Maintains two set of counters (Data and TLB)</li>
+			</ul>
+			</section>
+			<section>
+			<h3>LRU Stack</h3>
+			<img class="fragment" style="width:60%;" src="images/csalt/stack.jpg"/>
+			</section>
+			<section>
+			<h3>Marginal Utility</h3>
+			<ul>
+				<li class="fragment">Uses Marginal Utility as the heuristic</li>
+				<li class="fragment">Calculated for all combinations</li>
+				<li class="fragment">Combination that has high MU is chosen</li>
+			</ul>
+			<img class="fragment" style="width:100%;" src="images/csalt/mu.jpg"/>
+			</section>
+			<section>
+			<h3>CSALT-CD</h3>
+			<ul>
+				<li class="fragment">Criticality weighted Dynamic partitioning</li>
+				<li class="fragment">Data misses and TLB line misses have different criticality</li>
+				<li class="fragment">Based on application</li>
+				<li class="fragment">Use performance counters to measure performance gains</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Criticality Weighted Marginal Utility</h3>
+			<ul>
+				<li class="fragment">Marginal Utility that takes criticality into account</li>
+				<li class="fragment">Scaled by criticality weights</li>
+				<li class="fragment">Criticality weight is the ratio of cycles for miss to hit</li>
+			</ul>
+			<img class="fragment" style="width:100%;" src="images/csalt/cwmu.jpg"/>
+			</section>
+			<section>
+			<h3>Overall Design</h3>
+			<img class="fragment" style="width:60%;" src="images/csalt/csalt.jpg"/>
+			</section>
+		</section>
+		<section>
+			<section>
+			<h3>Evaluations</h3>
+			<ul>
+				<li class="fragment">Trace based simulation using PIN tool</li>
+				<li class="fragment">Simulation with Modified Ramulator</li>
+				<li class="fragment">Uses Qemu with KVM</li>
+				<li class="fragment">Uses Benchmarks from PARSEC, Graph500, connected components</li>
+				<li class="fragment">Run two copies of multi threaded benchmark</li>
+				<li class="fragment">Compared with POM TLB</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Performance improvements</h3>
+			<img class="fragment" style="width:80%;" src="images/csalt/perf.jpg"/>
+			</section>
+			<section>
+			<h3>Other Results</h3>
+			<ul>
+				<li class="fragment">Perf. of CSALT-CD is better than CSALT-D</li>
+				<li class="fragment">In Native, gives a 1.05 speedup</li>
+				<li class="fragment">Compared with TSB and DIP, performs better
+					<ul>
+					<li class="fragment">TSB requires Multiple Accesses</li>
+					<li class="fragment">Both don't differentiate cache lines</li>
+					</ul>
+				</li>
+				<li class="fragment">Perf. improvment is better when more contexts are running</li>
+				<li class="fragment">Epoch of 256K accesses works best for most workloads</li>
+			</section>
+			<section>
+			<h3>Conclusion</h3>
+			<ul>
+				<li class="fragment">There are advantages to differentiate data and page table cache lines</li>
+				<li class="fragment">TLB misses are rare and so we can limit Page table cache lines to L1</li>
+				<li class="fragment">Better context switch performance seems to be a side effect</li>
+			</ul>
+			</section>
+		</section>
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>

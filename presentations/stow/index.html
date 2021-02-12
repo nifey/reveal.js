@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="../../css/reveal.css" />
+    <link rel="stylesheet" href="../../css/theme/simple.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h3>Managing dotfiles with GNU Stow</h3>
+        </section>
+        <section>
+          <section>
+            <h3>Dotfiles</h3>
+            <ul>
+              <li class="fragment">
+		      Configurations for editors, tools, etc
+              </li>
+              <li class="fragment">
+		      Plain text files
+              </li>
+              <li class="fragment">
+		      Usually present in home directory
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h3>Why manage dotfiles?</h3>
+	    <ul>
+		    <li class="fragment">Have the same configurations across all computers</li>
+		    <li class="fragment">Use Version control to keep dotfiles in sync</li>
+		    <li class="fragment">Share and try other's configurations</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Ways to manage dotfiles</h3>
+	    <ul>
+		    <li class="fragment">Copy dotfiles into a git repository</li>
+		    <li class="fragment">Using script to copy or link</li>
+		    <li class="fragment">Stow - organized and easy way</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>GNU Stow</h3>
+            <ul>
+              <li class="fragment">
+		      "Symlink farm manager"
+              </li>
+              <li class="fragment">
+		      Creates symlinks at different locations that point to files in a directory
+              </li>
+              <li class="fragment">
+		      Widely used to manage dotfiles
+              </li>
+            </ul>
+          </section>
+        </section>
+      </div>
+    </div>
+    <script src="../../js/reveal.js"></script>
+    <script>
+      Reveal.initialize();
+    </script>
+  </body>
+</html>

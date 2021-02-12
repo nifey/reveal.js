@@ -1,0 +1,177 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+			<h3>RiCH: Implementing Reductions in Cache Hierarchy</h3>	
+			<p>Vladimir Dimić&sup1;&ensp;Miquel Moretó&sup1;&ensp;Marc Casas&sup1;<br/>Jan Ciesko&sup2;&ensp;Mateo Valero&sup1;</p>
+			<small>&sup1;Barcelona Supercomputing Center</small>
+			<small>&sup2;Sandia National Laboratories, USA</small>
+			</section>
+		<section>
+			<section>
+			<h3>Reductions</h3>
+			<ul>
+				<li class="fragment">Common operation in HPC</li>
+				<li class="fragment">Eg: Sum, Min, Max, Logical ops, etc</li>
+				<li class="fragment">Commutative and Associative</li>
+				<li class="fragment">Can be parallelized</li>
+				<li class="fragment">Two types
+			<ul>
+				<li class="fragment">Reduction over scalar types</li>
+				<li class="fragment">Reduction over vector types</li>
+			</ul>
+			</ul>
+			</section>
+			<section>
+			<h3>Software Approaches to parallelize reductions</h3>
+			<dl>
+				<dt class="fragment">Privatization</dt>
+				<dd>
+				<ul>
+					<li class="fragment">Perform reduction on private data and then perform global reduction</li>
+					<li class="fragment">Works well for small reduction variables</li>
+					<li class="fragment">Cache pollution</li>
+				<ul>
+				</dd>
+				<dt class="fragment">Atomics</dt>
+				<dd>
+				<ul>
+				<li class="fragment">Use Atomic instructions to update global reduction variable</li>
+				<li class="fragment">Works well for larger reduction variables</li>
+				<li class="fragment">Cache coherence invalidations and False sharing</li>
+				</ul>
+				</dd>
+			</dl>
+			</section>
+			<section>
+			<h3>Hardware Approaches to parallelize reductions</h3>
+			<dl>
+				<dt class="fragment">Private Cache line</dt>
+				<dd>
+				<ul>
+					<li class="fragment">Perform reduction on private cache line</li>
+					<li class="fragment">Works well for small reduction variables</li>
+					<li class="fragment">Cache pollution</li>
+				<ul>
+				</dd>
+				<dt class="fragment">Atomic Remote memory update</dt>
+				<dd>
+				<ul>
+				<li class="fragment">Updates data present in LLC or some remote functional unit</li>
+				<li class="fragment">Updates are serialized for small reduction variables</li>
+				</ul>
+				</dd>
+			</dl>
+			</section>
+			<section>
+			<h3>Problems with existing Hardware solutions</h3>
+			<ul>
+				<li class="fragment">Modifies ISA =&gt; Libraries need to be modified</li>
+				<li class="fragment">Modifies cache coherence protocol =&gt; Hard to verify</li>
+			</ul>
+			</section>
+		</section>	
+		<section>
+			<section>
+			<h3>RiCH</h3>
+			<ul>
+				<li class="fragment">Runtime assisted Hardware solution</li>
+				<li class="fragment">Offloads reductions from the CPU core</li>
+				<li class="fragment">Allows programmer to annotate where to perform reduction</li>
+				<li class="fragment">Options: L1, L2 or LLC</li>
+				<li class="fragment">Allows control of Cache Pollution</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Hardware modifications</h3>
+				<img src="images/rich.png"/>
+			</section>
+			<section>
+			<h3>Annotations and Runtime modifications</h3>
+				<pre class="fragment"><code data-line-numbers="2" class="c">
+#pragma omp task reduction(+:L1:sum)
+for(i=0; i&lt;N; i++){
+	sum += vec[i];
+}
+#pragma omp taskwait
+				</code></pre>
+				<pre class="fragment"><code>
+__builtin_GOMP_task(...)
+set_redu(add, L1, sum);
+for(i=0; i&lt;N; i++){
+	LD %(vec, i) -&gt; %edx
+	LD %(sum) -&gt; %eax
+	ADD %eax,%edx -&gt; %eax
+	ST %eax -&gt; %(sum)
+}
+unset_redu(sum);
+__builtin_GOMP_taskwait(...)
+				</code></pre>
+			</section>
+		</section>	
+		<section>
+			<section>
+			<h3>Reduction Variable Table</h3>
+			<ul>
+				<li class="fragment">Memory mapped registers</li>
+				<li class="fragment">Updated by runtime</li>
+				<li class="fragment">Helps CPU core identify reduction instructions</li>
+				<li class="fragment">Once identfied, CPU forwards reduction operation to RM</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Reduction Module</h3>
+			<img src="images/rm1.jpg"/>
+			</section>
+			<section data-transition="none">
+			<h3>Reduction Module</h3>
+			<img src="images/rm2.jpg"/>
+			</section>
+			<section data-transition="none">
+			<h3>Reduction Module</h3>
+			<img src="images/rm3.jpg"/>
+			</section>
+			<section data-transition="none">
+			<h3>Reduction Module</h3>
+			<img src="images/rm4.jpg"/>
+			</section>
+			<section data-transition="none">
+			<h3>Reduction Module</h3>
+			<img src="images/rm5.jpg"/>
+			</section>
+			<section data-transition="none">
+			<h3>Reduction Module</h3>
+			<img src="images/rm6.jpg"/>
+			</section>
+		</section>	
+		<section>	
+		<section>	
+			<h3>Advantages</h3>
+			<ul>
+				<li class="fragment">Load modify store instructions performed together</li>
+				<li class="fragment">Does not suffer from coherence effects</li>
+				<li class="fragment">Updation at higher cache levels reduced cache pollution</li>
+			</ul>
+		</section>	
+		<section>	
+			<h3>Conclusion</h3>
+			<ul>
+				<li class="fragment">Hardware solution to speedup reductions using cache hierarchy</li>
+				<li class="fragment">1.11% Speedup on average</li>
+				<li class="fragment">2.4% area and 3.8% power overheads</li>
+			</ul>
+		</section>	
+		</section>	
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>

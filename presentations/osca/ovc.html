@@ -1,0 +1,168 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="../../css/reveal.css" />
+    <link rel="stylesheet" href="../../css/theme/simple.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <section>
+            <h3>
+              Reducing Memory Reference Energy with Opportunistic Virtual
+              Caching
+            </h3>
+            <p>
+              Arkaprava Basu&sup1;&ensp;Mark D. Hill&sup1;&ensp;Michael M.
+              Swift&sup1;
+            </p>
+            <small>&sup1;University of Wisconsin-Madison</small>
+	    </br>
+            <small>ISCA 2012</small>
+          </section>
+          </section>
+          <section>
+          <section>
+            <h3>Problems in VIPT cache</h3>
+            <ul>
+              <li class="fragment">Places constraint on Associativity</li>
+              <li class="fragment">Needs TLB access on every cache access</li>
+              <li class="fragment">Uses more Energy</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Benefits of Virtual cache</h3>
+            <ul>
+              <li class="fragment">Needs address translation only on cache miss</li>
+              <li class="fragment">Does not impose an associativity constraint</li>
+              <li class="fragment">Access latency decreases</li>
+              <li class="fragment">Uses less Energy</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Problems in Virtual caches</h3>
+            <ul>
+              <li class="fragment">Synonyms</li>
+              <li class="fragment">Homonyms</li>
+              <li class="fragment">Page mapping and protection changes</li>
+              <li class="fragment">Dirty cache block evictions</li>
+              <li class="fragment">Cache coherence</li>
+              <li class="fragment">Compatibility with architecture and OS</li>
+            </ul>
+          </section>
+          </section>
+          <section>
+	  <section>
+            <h3>Opportunistic Virtual Caching</h3>
+            <ul>
+		    <li class="fragment"><b>Observation 1:</b> Synonyms are present but are mostly read only</li>
+		    <li class="fragment"><b>Observation 2:</b> TLB invalidations due to page mapping or permission changes are infrequent</li>
+		    <li class="fragment"><b>Key Idea:</b> Use both virtual caching and physical caching</li>
+            </ul>
+          </section>
+          </section>
+          <section>
+          <section>
+            <h3>OVC Hardware</h3>
+	    <ul>
+		    <li class="fragment">Determines when to use virtual caching</li>
+		    <li class="fragment">Opportunistically reduces power</li>
+		    <li class="fragment">Handle Homonyms and Permission changes</li>
+		    <li class="fragment">Handle coherence for virtual blocks</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>When to use virtual caching</h3>
+	    <ul>
+		    <li class="fragment">One bit OVC_enable register</li>
+		    <li class="fragment">Virtual address range is partitioned</li>
+		    <li class="fragment">Uses the MSB of Virtual address</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Opportunistically reducing power</h3>
+	    <img class="fragment" style="width:47%;height:60%" src="images/ovc/ovc1.jpg"/>
+	    <img class="fragment" style="width:47%;height:60%" src="images/ovc/ovc2.jpg"/>
+          </section>
+          <section>
+            <h3>Handling Homonyms and permission changes</h3>
+	    <ul>
+		    <li class="fragment">Homonyms are handled using ASID</li>
+		    <li class="fragment">Both ASID and virtual tag need to match</li>
+		    <li class="fragment">Permissions changes causes cache flushes</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Handling Dirty block evictions and Cache coherence</h3>
+	    <ul>
+		    <li class="fragment">Both need reverse translation</li>
+		    <li class="fragment">Stores the Physical tag along with block</li>
+		    <li class="fragment">Coherence requests checks the Physical tag for the set</li>
+		    <li class="fragment">Also used for Back invalidations</li>
+	    </ul>
+          </section>
+          </section>
+          <section>
+          <section>
+            <h3>OS modifications</h3>
+	    <ul>
+		    <li class="fragment">Predicts when virtual caching is required</li>
+		    <li class="fragment">Informing hardware to use virtual caching</li>
+		    <li class="fragment">Ensuring correctness</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Predicting when virtual caching is desirable</h3>
+	    <ul>
+		    <li class="fragment">Allocator predicts which pages to use virtual caching</li>
+		    <li class="fragment"><b>Safety</b>: No read write synonyms</li>
+		    <li class="fragment">VM_SHARED and VM_WRITE/VM_MAYWRITE flags</li>
+		    <li class="fragment"><b>Efficient</b>: No frequent permission changes</li>
+		    <li class="fragment">MAP_DYNAMIC flag</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Informing hardware to use virtual caching</h3>
+	    <ul>
+		    <li class="fragment">Virtual address space is partitioned</li>
+		    <li class="fragment">Uses MSB to signal virtual caching</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Ensuring correctness</h3>
+	    <ul>
+		    <li class="fragment">Flush the cache on permission changes</li>
+		    <li class="fragment">Detects when synonyms are written to</li>
+		    <li class="fragment">Flush after Tainted process executes</li>
+	    </ul>
+          </section>
+          </section>
+	  <section>
+          <section>
+            <h3>Evaluations</h3>
+	    <ul>
+		    <li class="fragment">Gem5 full system simulation</li>
+		    <li class="fragment">Modified Linux 2.6.28-4</li>
+		    <li class="fragment">Benchmarks from Parsec, memcached, bind</li>
+		    <li class="fragment">CACTI for computing energy</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Results</h3>
+	    <ul>
+		    <li class="fragment">Adds 10% additional space overhead for L1 cache</li>
+		    <li class="fragment">Doesn't affect runtime very much (within 0.017%)</li>
+		    <li class="fragment">19% Dynamic energy saved (39% max)</li>
+		    <li class="fragment">Includes energy spend in TLB and cache hierarchy</li>
+	    </ul>
+          </section>
+          </section>
+        </section>
+      </div>
+    </div>
+    <script src="../../js/reveal.js"></script>
+    <script>
+      Reveal.initialize();
+    </script>
+  </body>
+</html>

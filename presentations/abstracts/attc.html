@@ -1,0 +1,63 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+		<section>
+			<section>
+			<h3>ATTC (@C) : Addressable-TLB based Translation Coherence</h3>	
+			<p>Harsh Gugale&sup1;&ensp;Nagendra Gulur&sup2;&ensp;</br>Yashwant Marathe&sup1;&ensp;Lizy K. John&sup1;&ensp;</p>
+			<small>&sup1;University of Texas at Austin</small>
+			<small>&sup2;University of North Texas</small>
+			</section>
+			<section>
+			<h3>TLB Shootdown</h3>
+			<ul>
+				<li class="fragment">Happens whenever OS updates page tables</li>
+				<li class="fragment">Stale TLB entries have to be invalidated</li>
+				<li class="fragment">Uses Inter Processor Interrupt to update remote cores</li>
+				<li class="fragment">Synchronous (Needs acknowledgements)</li>
+				<li class="fragment">Important for Page remappings in Heterogeneous memory</li>
+				<li class="fragment">Software (OS) performs TLB shootdowns</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Virtualized systems</h3>
+			<ul>
+				<li class="fragment">Shootdowns has to be sent to vCPUs</li>
+				<li class="fragment">The receiver vCPU might not be scheduled and may delay acknoledgement</li>
+				<li class="fragment">Both host and guest page table updates causes shootdowns</li>
+				<li class="fragment">IPIs in Virtualized systems involves Hypervisor intervention</li>
+			</ul>
+			</section>
+			<section>
+			<h3>ATTC : Addressable-TLB based Translation Coherence</h3>
+			<ul>
+				<li class="fragment">Hardware based translation coherence</li>
+				<li class="fragment">Store PTEs in ATLB and use cache coherence</li>
+				<li class="fragment">Modify cache coherence to invalidate Private TLBs</li>
+				<li class="fragment">OS also writes to ATLB whenever it makes PTE changes</li>
+				<li class="fragment">Uses an Inverse table to do Host shootdowns</li>
+				<li class="fragment">Removes all IPIs</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Conclusion</h3>
+			<ul>
+				<li class="fragment">35.7% performance improvement over baseline virtualized system</li>
+				<li class="fragment">7.4% performance improvement over HATRIC</li>
+				<li class="fragment">More beneficial for Virtualized and heterogeneous memory systems</li>
+			</ul>
+			</section>
+		</section>
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>

@@ -1,0 +1,197 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="../../css/reveal.css" />
+    <link rel="stylesheet" href="../../css/theme/simple.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <section>
+            <h3>
+		    Optimizing Nested Virtualization Performance Using Direct Virtual Hardware
+            </h3>
+            <p>
+	    Jin Tack Lim&sup1;&ensp;Jason Nieh&sup1;&ensp;
+            </p>
+            <small>&sup1;Columbia University</small>
+	    </br>
+            <small>ASPLOS 2020</small>
+          </section>
+	</section>
+        <section>
+          <section>
+            <h3>Nested virtualization</h3>
+            <ul>
+              <li class="fragment">VMs on top of IaaS cloud providers</li>
+	      <li class="fragment">Support for legacy applications and security</li>
+	      <li class="fragment">Performance overheads are high</li>
+            </ul>
+          </section>
+          <section>
+            <h3>I/O Virtualization models</h3>
+            <ol>
+              <li class="fragment">
+		      Device Passthrough
+		      <ul>
+			      <li class="fragment">Directly assign Physical devices to VM</li>
+			      <li class="fragment">Gives better performance</li>
+			      <li class="fragment">Disallows migration of VM</li>
+			      <li class="fragment">Needs additional Hardware support</li>
+		      </ul>
+	      </li>
+              <li class="fragment">
+		      Virtual I/O
+		      <ul>
+			      <li class="fragment">Hypervisor assigns a virtual device to VM</li>
+			      <li class="fragment">Needs hypervisor intervention</li>
+			      <li class="fragment">Exit multiplication problem in Nested virtualization</li>
+		      </ul>
+	      </li>
+            </ol>
+          </section>
+          <section>
+            <h3>Nested I/O virtualization</h3>
+	    <img style="width:40%" src="images/dvh/nested_io.jpg"/>
+          </section>
+          <section>
+            <h3>Hardware support for Virtualization</h3>
+            <ul>
+		    <li class="fragment">x86 and ARM provide architectural support</li>
+		    <li class="fragment">Supports only single level virtualization</li>
+		    <li class="fragment">Only host hypervisor can use them</li>
+		    <li class="fragment">All privileged instruction fault to the host hypervisor</li>
+		    <li class="fragment">Causes Exit multiplication problem</li>
+	    </ul>
+          </section>
+	  <section>
+            <h3>Direct Virtual Hardware</h3>
+	    <img style="width:60%" src="images/dvh/exit.jpg"/>
+	  </section>
+	  <section>
+            <h3>Techniques proposed</h3>
+	    <ol>
+		    <li class="fragment">Virtual Passthrough</li>
+		    <li class="fragment">Virtual Timers</li>
+		    <li class="fragment">Virtual IPI</li>
+		    <li class="fragment">Virtual idle</li>
+	    </ol>
+	  </section>
+        </section>
+	<section>
+	  <section>
+	    <h3>Virtual Passthrough</h3>
+	    <ul>
+		    <li class="fragment">Host hypervisor assigns virtual devices</li>
+		    <li class="fragment">Performance similar to device passthrough</li>
+		    <li class="fragment">Guest Hypervisor with passthrought support</li>
+		    <li class="fragment">Allows VM migration</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h3>Virtual Passthrough</h3>
+	    <img style="width:60%" src="images/dvh/vpass.jpg"/>
+	  </section>
+	  <section>
+	    <h3>Recursive Virtual Passthrough</h3>
+	    <img style="width:30%" src="images/dvh/vpass2.jpg"/>
+	  </section>
+	</section>
+	<section>
+	  <section>
+	    <h3>Timers</h3>
+	    <ul>
+		    <li class="fragment">OSes need Timers</li>
+		    <li class="fragment">
+			    Two ways to provide timers to VMs
+			    <ol>
+				    <li class="fragment">Software emulation (Linux hrtimers)</li>
+				    <li class="fragment">Architectural support for timers (VMX-preemption timers (VT-x))</li>
+			    </ol>
+		    </li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h3>Virtual Timers</h3>
+	    <ul>
+		    <li class="fragment">Reduces overheads when OS tries to set timers</li>
+		    <li class="fragment">Host hypervisor handles timers instead of forwarding to guest hypervisor</li>
+		    <li class="fragment">Exposes additional virtual timers</li>
+		    <li class="fragment">Guest hypervisor is only responsible to save and restore timer data</li>
+		    <li class="fragment">Timer interrupts can be optimized with Posted interrupts</li>
+		    <li class="fragment">Posted Interrupts: Allows VM to recieve interrupts without exiting to hypervisor</li>
+	    </ul>
+	  </section>
+	</section>
+	<section>
+	  <section>
+	    <h3>Virtual IPI</h3>
+	    <ul>
+		    <li class="fragment">Inter Processor Interrupts between logical cores</li>
+		    <li class="fragment">Involves writing to ICR Interrupt Command Register</li>
+		    <li class="fragment">Posted Interrupts reduces overheads only on receiver side</li>
+		    <li class="fragment">Guest hypervisor needs to expose CPU mappings to Host hypervisor</li>
+		    <li class="fragment">Uses a mechanism similar to page table</li>
+		    <li class="fragment">Host intervention required only on sender side</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h3>Nested VM IPI</h3>
+	    <img style="width:90%" src="images/dvh/vipi1.jpg"/>
+	  </section>
+	  <section>
+	    <h3>Virtual IPI</h3>
+	    <img style="width:90%" src="images/dvh/vipi2.jpg"/>
+	  </section>
+	</section>
+	<section>
+	  <section>
+	    <h3>Virtual idle</h3>
+	    <ul>
+		    <li class="fragment">Reduces overheads when entering low power state</li>
+		    <li class="fragment">L1 enables only if it has only one L2 VM</li>
+		    <li class="fragment">On a trap, L0 switches to other L1 hypervisor or enters low power state</li>
+	    </ul>
+	  </section>
+	</section>
+	<section>
+	  <section>
+	    <h3>Evaulations</h3>
+	    <ul>
+		    <li class="fragment">Implemented 4 techniques in KVM</li>
+		    <li class="fragment">Use KVM and Qemu as the Host and guest hypervisors</li>
+		    <li class="fragment">Use microbenchmarks, Apache, MySQL, memcached, netperf and hackbench</li>
+		    <li class="fragment">Also perform experiments testing L3 VM</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h3>Micro Benchmark Results</h3>
+	    <ul>
+		    <li class="fragment">Virtual passthrough performs 3 times better</li>
+		    <li class="fragment">Virtual timer performs 13 times better</li>
+		    <li class="fragment">Virtual IPI and Virtual idle performs 8 times better</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h3>Performance on L2 VM</h3>
+	    <img style="width:70%" src="images/dvh/perf1.jpg"/>
+	  </section>
+	  <section>
+	    <h3>Performance on L3 VM</h3>
+	    <img style="width:70%" src="images/dvh/perf2.jpg"/>
+	  </section>
+	  <section>
+	    <h3>Overall</h3>
+	    <ul>
+		    <li class="fragment">DVH performs close to Direct passthrough while allowing migration</li>
+	    </ul>
+	  </section>
+	</section>
+      </div>
+    </div>
+    <script src="../../js/reveal.js"></script>
+    <script>
+      Reveal.initialize();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,95 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+		<section>
+			<section>
+			<h3>ATMem: Adaptive Data Placement in Graph Applications on Heterogeneous Memories</h3>	
+			<p>Yu Chen&sup1;&ensp;Ivy B. Peng&sup2;&ensp;Zhen Peng&sup1;&ensp;Xu Liu&sup1;&ensp;Bin Ren&sup1;&ensp;</p>
+			<small>&sup1;College of William & Mary</small>
+			<small>&sup2;Lawrence Livermore National Laboratory</small>
+			</section>
+			<section>
+			<h3>Heterogeneous Memory systems</h3>
+			<ul>
+				<li class="fragment">High performance memory + High capacity memory</li>
+				<li class="fragment">Eg: DRAM + NVM, MCDRAM + DRAM</li>
+				<li class="fragment">Critical data to be placed on High performance memory</li>
+				<li class="fragment">Tradeoff between performance and memory used</li>
+				<li class="fragment">Graph applications
+					<ul>
+						<li class="fragment">Massive data structures</li>
+						<li class="fragment">Skewed access patterns</li>
+					</ul>
+				</li>
+			</ul>
+			</section>
+			<section>
+			<h3>ATMem</h3>
+			<ul>
+				<li class="fragment">Implemented as a Runtime library</li>
+				<li class="fragment">Critical Data Chunk migration
+					<ul>
+						<li class="fragment">Data structure granularity</li>
+						<li class="fragment">Better utilization of memory</li>
+					</ul>
+				</li>
+				<li class="fragment">Lightweight sampling based profiling
+					<ul>
+						<li class="fragment">Uses performance counters</li>
+						<li class="fragment">Uses a Tree based clustering strategy</li>
+					</ul>
+				</li>
+				<li class="fragment">Multi-stage Multi-threaded migration
+					<ul>
+						<li class="fragment">Data migration at the application level</li>
+						<li class="fragment">Reduce TLB misses</li>
+						<li class="fragment">Using Multiple threads to exploit high bandwidth</li>
+					</ul>
+				</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Evalutations</h3>
+			<ul>
+				<li class="fragment">Evaluate on Real systems
+					<ul>
+						<li class="fragment">NVM-DRAM testbed (Intel Xeon Platinum 8260L)</li>
+						<li class="fragment">MCDRAM-DRAM testbed (Intel Xeon Phi 7200)</li>
+					</ul>
+				</li>
+				<li class="fragment">5 graph applications: BFS, SSSP, BC, PR, CC</li>
+				<li class="fragment">On 5 different graph datasets</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Conclusion</h3>
+			<ul>
+				<li class="fragment">ATMem selects 5%-18% data to be placed on high-performance memory</li>
+				<li class="fragment">Compared to a baseline with all data in high capacity memory
+					<ul>
+						<li class="fragment">achieves 1.7x-3.4x speedup on NVM-DRAM</li>
+						<li class="fragment">achieves 1.2x-2.0x speedup on MCDRAM-DRAM</li>
+					</ul>
+				</li>
+				<li class="fragment">Compared to an ideal full DRAM system
+					<ul>
+						<li class="fragment">achieves 9-54% slowdown on NVM-DRAM</li>
+						<li class="fragment">while only using a fraction of DRAM</li>
+					</ul>
+				</li>
+			</ul>
+			</section>
+		</section>
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>

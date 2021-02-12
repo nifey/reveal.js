@@ -1,0 +1,74 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+		<section>
+			<section>
+			<h3>Mitosis: Transparently Self Replicating Page Tables for Large Memory Machines</h3>	
+			<p>Reto Achermann&sup1;&ensp;Ashish Panwar&sup2;&ensp;<br/>Abhishek Bhattacharjee&sup3;<br/>Timothy Roscoe&sup1;&ensp;Jayneel Gandhi<sup>&sect;</sup></p>
+			<small>&sup1;ETH Zurich</small>
+			<small>&sup2;IISc Bangalore</small>
+			<small>&sup3;Yale University</small>
+			<small><sup>&sect;</sup>VMware Research</small>
+			</section>
+			<section>
+			<h3>Problem: Page table accesses on NUMA nodes</h3>
+			<ul>
+				<li class="fragment">TLB misses on x86 requires at max 4 page table accesses</li>
+				<li class="fragment">On NUMA nodes these accesses might be remote</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Scenario 1: Multi socket programs</h3>
+			<ul>
+				<li class="fragment">Linux uses first touch policy</li>
+				<li class="fragment">Placement of page table pages is skewed</li>
+				<li class="fragment">Significant portion of PTEs are remote</li>
+				<li class="fragment">AutoNUMA migrates only data pages not page table pages</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Scenario 2: Workload migration</h3>
+			<ul>
+				<li class="fragment">OS may migrate processes between sockets</li>
+				<li class="fragment">Suffers 3.3x to 3.6x slowdown when page tables are remote</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Mitosis</h3>
+			<ul>
+				<li class="fragment">Replicate Page table pages across nodes</li>
+				<li class="fragment">Need to keep the page tables consistent</li>
+				<li class="fragment">Use local replica if available</li>
+				<li class="fragment">Enables Page table migration</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Mitosis: Mechanism</h3>
+			<ul>
+				<li class="fragment">Reserve memory for page tables on every socket</li>
+				<li class="fragment">Modify Context switch to load local replica into CR3</li>
+				<li class="fragment">Hold page lock untill all replicas are updated</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Conclusion</h3>
+			<ul>
+				<li class="fragment">Implement in Linux 4.17</li>
+				<li class="fragment">Upto 1.34x speedup for Multi socket programs</li>
+				<li class="fragment">Upto 3.24x speedup for Process migration</li>
+			</ul>
+			</section>
+		</section>
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>

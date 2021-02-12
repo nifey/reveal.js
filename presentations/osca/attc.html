@@ -1,0 +1,172 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+		<section>
+			<section>
+			<h3>ATTC (@C) : Addressable-TLB based Translation Coherence</h3>	
+			<p>Harsh Gugale&sup1;&ensp;Nagendra Gulur&sup2;&ensp;</br>Yashwant Marathe&sup1;&ensp;Lizy K. John&sup1;&ensp;</p>
+			<small>&sup1;University of Texas at Austin</small>
+			<small>&sup2;University of North Texas</small>
+			</section>
+			<section>
+			<h3>TLB Shootdown</h3>
+			<ul>
+				<li class="fragment">Happens whenever OS updates page tables</li>
+				<li class="fragment">Stale TLB entries have to be invalidated</li>
+				<li class="fragment">Uses Inter Processor Interrupt to update remote cores</li>
+				<li class="fragment">Synchronous (Needs acknowledgements)</li>
+				<li class="fragment">Important for Page remappings in Heterogeneous memory</li>
+				<li class="fragment">Software (OS) performs TLB shootdowns</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Virtualized systems</h3>
+			<ul>
+				<li class="fragment">Shootdowns has to be sent to vCPUs</li>
+				<li class="fragment">The receiver vCPU might not be scheduled and may delay acknoledgement</li>
+				<li class="fragment">Both host and guest page table updates causes shootdowns</li>
+				<li class="fragment">IPIs in Virtualized systems involves Hypervisor intervention</li>
+			</ul>
+			</section>
+		</section>
+		<section>
+			<section>
+			<h3>ATTC : Addressable-TLB based Translation Coherence</h3>
+			<ul>
+				<li class="fragment">Hardware based translation coherence</li>
+				<li class="fragment">Consists of two components
+					<ol>
+						<li class="fragment">ATLB Addressible-TLB</li>
+						<li class="fragment">INVTBL Inverse table</li>
+					</ol>
+				</li>
+			</ul>
+			</section>
+			<section>
+			<h3>ATLB Addressable-TLB</h3>
+			<ul>
+				<li class="fragment">TLB in memory</li>
+				<li class="fragment">Organized as a set associative cache</li>
+				<li class="fragment">Each set is 64B and contains 4 gVA -&gt; sPA PTEs</li>
+				<li class="fragment">If there are N sets in the ATLB</li>
+			</ul>
+			<img class="fragment" src="images/attc/attc_addr.jpg"/>
+			</section>
+			<section>
+			<h3>Modification to cache coherence protocol</h3>
+			<ul>
+				<li class="fragment">ATLB cache blocks can be cached in Data caches</li>
+				<li class="fragment">Cache blocks are invalidated</li>
+				<li class="fragment">Private TLBs are also evicted</li>
+				<li class="fragment">Coherence message to TLB sends ATLB set</li>
+				<li class="fragment">By constructing the TLB set using the ATLB set</li>
+				<li class="fragment">Partial gVA tag is used for matching</li>
+				<li class="fragment">16MB ATLB give 14 bits of partial tag</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Guest page table updates</h3>
+			<img style="width:70%" class="fragment" src="images/attc/attc_guest.jpg"/>
+			</section>
+			<section>
+			<h3>INVTBL Inverse Table</h3>
+			<ul>
+				<li class="fragment">Required for Host shootdowns</li>
+				<li class="fragment">Set associative structure indexed by sPA</li>
+				<li class="fragment">Each entry stores ATLB set that contains an entry pointing to the sPA</li>
+				<li class="fragment">Used to track synonyms</li>
+				<li class="fragment">Page table walker installs an entry whenever a Page Walk is complete</li>
+				<li class="fragment">During Host shootdown, INVTBL is looked up and the correspoding entry in ATLB is invalidated</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Invariant for correctness</h3>
+			<ul>
+				<li class="fragment">Every entry in ATLB should have an entry in INLTBL</li>
+				<li class="fragment">Otherwise an application might use old translation</li>
+				<li class="fragment">Eviction in INVTBL causes evition in ATLB</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Host page table updates</h3>
+			<ul>
+				<li class="fragment">Lookup of INVTBL to get ATLB pointers</li>
+				<li class="fragment">Writes to each of the ATLB pointers (Invalidation)</li>
+				<li class="fragment">Causes upto 5 DRAM accesses</li>
+				<li class="fragment">Time taken is 10-100x better than IPI shootdowns</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Overheads and security</h3>
+			<ul>
+				<li class="fragment">OS also writes to ATLB whenever it makes PTE changes</li>
+				<li class="fragment">Hardware to detect ATLB and INVTBL range</li>
+				<li class="fragment">Hardware modifications to PTW, Private TLBs</li>
+				<li class="fragment">ATLB (16MB) and INVTBL (4MB) occupy DRAM space</li>
+				<li class="fragment">Writes by Guest OS to ATLB is handled by Page table walker</li>
+				<li class="fragment">Ensures that the Guest OS does not write to other VM's entries</li>
+				<li class="fragment">Only Hypervisor can read or write to INVTBL</li>
+			</ul>
+			</section>
+		</section>
+		<section>
+			<section>
+			<h3>Evaluations</h3>
+			<ul>
+				<li class="fragment">Using a trace based simulator</li>
+				<li class="fragment">Use QEMU with KVM as the hypervisor</li>
+				<li class="fragment">Use subset of PARSEC, Phoenix and NAS benchmarks</li>
+				<li class="fragment">Compare with HATRIC and POMTLB</li>
+				<li class="fragment">Measure latency of shootdowns with ftrace on real systems</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Results - Latency study</h3>
+			<img src="images/attc/attc_res1.jpg"/>
+			</section>
+			<section>
+			<h3>Results - Shootdown study</h3>
+			<img src="images/attc/attc_res2.jpg"/>
+			</section>
+			<section>
+			<h3>Results</h3>
+			<ul>
+				<li class="fragment">Initiator core latency depends on number of cores to which IPI is sent</li>
+				<li class="fragment">Zero page invalidations are caused due to imprecise tracking of TLB entries</li>
+				<li class="fragment">Increased invalidation latency doesn't degrade ATTC performance</li>
+				<li class="fragment">ATLB has 93.1% hit rate on average</li>
+				<li class="fragment">ATTC does give some improvement in Native systems</li>
+				<li class="fragment">In native systems the INVTBL is not needed</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Overall</h3>
+			<ul>
+				<li class="fragment">ATTC performs better than HATRIC when guest initiated page table updates are more</li>
+				<li class="fragment">35.7% performance improvement over baseline virtualized system</li>
+				<li class="fragment">7.4% performance improvement over HATRIC</li>
+				<li class="fragment">More beneficial for Virtualized and heterogeneous memory systems</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Limitations</h3>
+			<ul>
+				<li class="fragment">ATLB and INVTBL can be used for cache side channel attacks</li>
+				<li class="fragment">Partial tag match can cause unnecessary evictions</li>
+				<li class="fragment">Associativity of INVTBL gives upper limit on the number of Synonyms that can be cached</li>
+			</ul>
+			</section>
+		</section>
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>

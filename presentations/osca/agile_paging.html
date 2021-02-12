@@ -1,0 +1,178 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="../../css/reveal.css" />
+    <link rel="stylesheet" href="../../css/theme/simple.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <section>
+            <h3>
+		    Agile Paging: Exceeding the Best of Nested and Shadow Paging
+            </h3>
+            <p>
+              Jayneel Gandhi&sup1;&ensp;Mark D. Hill&sup1;&ensp;Michael M.
+              Swift&sup1;
+            </p>
+            <small>&sup1;University of Wisconsin-Madison</small>
+	    </br>
+            <small>ISCA 2016</small>
+          </section>
+          </section>
+          <section>
+          <section>
+            <h3>Challenge in Virtualized systems</h3>
+            <ul>
+              <li class="fragment">Two levels of address translation</li>
+	      <li class="fragment">GVa -&gt; GPa -&gt; HPa</li>
+	      <li class="fragment">TLB misses are costly</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Two techniques</h3>
+            <ol>
+              <li class="fragment">Nested paging</li>
+              <li class="fragment">Shadow paging</li>
+            </ol>
+          </section>
+          <section>
+            <h3>Nested paging</h3>
+            <ul>
+		    <li class="fragment">2 Dimensional page walk</li>
+		    <li class="fragment">Needs atmost <b>24</b> memory references during a page walk</li>
+		    <li class="fragment">Easier to update page table</li>
+		    <li class="fragment">Guest OS manages guest page table (gVA -&gt; gPA)</li>
+		    <li class="fragment">VMM manages host page table (gPA -&gt; hPA)</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Nested paging 2D page walk</h3>
+	    <img src="images/agilepaging/basenested.jpg"/>
+          </section>
+          <section>
+            <h3>Shadow paging</h3>
+            <ul>
+		    <li class="fragment">1 Dimensional page walk</li>
+		    <li class="fragment">Needs atmost <b>4</b> memory references during a page walk</li>
+		    <li class="fragment">Page table updates requires VMM intervention (VMtrap)</li>
+		    <li class="fragment">Context switch also requires a VMtrap to decide which shadow page to use</li>
+		    <li class="fragment">VMM manages shadow page table (gVA -&gt; hPA)</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Shadow paging page walk</h3>
+	    <img style="width:30%;" src="images/agilepaging/shadow.jpg"/>
+          </section>
+          </section>
+          <section>
+	  <section>
+            <h3>Agile paging</h3>
+            <ul>
+		    <li class="fragment"><b>Key Intuition:</b> Leaf PTEs change more frequently than higher PTEs</li>
+		    <li class="fragment">Only some part of address space change dynamically</li>
+		    <li class="fragment"><b>Key Idea:</b> Use both Nested paging and shadow paging</li>
+		    <li class="fragment">Shadow paging for fast page table walks for static pages</li>
+		    <li class="fragment">Nested paging for fast page table updates for dynamic pages</li>
+            </ul>
+          </section>
+	  <section>
+            <h3>Agile paging</h3>
+            <ul>
+		    <li class="fragment">Start with Shadow page tables</li>
+		    <li class="fragment">Switch to Nested paging if required</li>
+		    <li class="fragment">Need to maintain Guest, Host and Shadow page tables</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Agile paging page walk</h3>
+	    <img style="width:30%;" src="images/agilepaging/agile.jpg"/>
+          </section>
+	  <section>
+            <h3>Hardware mechanism</h3>
+            <ul>
+		    <li class="fragment">Uses a switching bit in every PTE</li>
+		    <li class="fragment">If set, the PTE holds hPA of next guest page table level</li>
+		    <li class="fragment">Needs architectural 3 page table pointer registers</li>
+		    <li class="fragment">Allows 6 different degrees of nesting</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Different degrees of nesting</h3>
+	    <img style="width:3000px" src="images/agilepaging/degrees.jpg"/>
+          </section>
+	  <section>
+            <h3>VMM mechanism</h3>
+            <ul>
+		    <li class="fragment">Updates shadow page table on every update to guest page table</li>
+		    <li class="fragment">Sets parts of guest table covered by shadow paging as read only</li>
+		    <li class="fragment">Causes VMTrap on writing to those pages</li>
+		    <li class="fragment">Rest of guest table has read write access</li>
+            </ul>
+          </section>
+	  <section>
+            <h3>Policy: Shadow to Nested</h3>
+            <ul>
+		    <li class="fragment">Observation: Updates to page are bimodal</li>
+		    <li class="fragment">Either 1 update or many update (within a time period)</li>
+		    <li class="fragment">Trigger: Two writes to any level</li>
+		    <li class="fragment">Converts that level and level below it to nested mode</li>
+            </ul>
+          </section>
+	  <section>
+            <h3>Policy: Nested to Shadow</h3>
+            <ul>
+		    <li class="fragment">Simple policy: Convert to shadow after fixed interval</li>
+		    <li class="fragment">Better policy: Switch non dynamic parts back into shadow paging</li>
+		    <li class="fragment">Use dirty bits of host page tables corresponding to guest page tables</li>
+		    <li class="fragment">Parent level converted before child level</li>
+            </ul>
+          </section>
+	  <section>
+            <h3>Hardware Optmizations for Accessed and Dirty bits</h3>
+            <ul>
+		    <li class="fragment">Accessed and Dirty bits has to be set in all 3 tables</li>
+		    <li class="fragment">Causes a VMtrap (high latency)</li>
+		    <li class="fragment">Instead let hardware page walker do this, without a VMtrap</li>
+            </ul>
+          </section>
+	  <section>
+            <h3>Hardware Optmizations for Context Switches</h3>
+            <ul>
+		    <li class="fragment">Context switch cause a VMtrap when writing to guest page table pointer</li>
+		    <li class="fragment">VMM updates the shadow page table pointer</li>
+		    <li class="fragment">Use a small H/W structure</li>
+		    <li class="fragment">Stores corresponding Shadow page table pointers for guest page table pointers</li>
+            </ul>
+          </section>
+          </section>
+	  <section>
+          <section>
+            <h3>Evaluations</h3>
+	    <ul>
+		    <li class="fragment">Modified Linux 3.12.13 and KVM</li>
+		    <li class="fragment">Benchmarks from Spec 2006, Parsec, Biobench, memcached, graph500</li>
+		    <li class="fragment">Use Badgertrap</li>
+		    <li class="fragment">Use Linear performance model using performance counters</li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Results</h3>
+	    <ul>
+		    <li class="fragment">Shadow paging is generally better than nested paging</li>
+		    <li class="fragment">Sometimes worse due to VMM interruptions</li>
+		    <li class="fragment">Agile paging performs better than both</li>
+		    <li class="fragment">More than 80% is covered by shadow mode</li>
+		    <li class="fragment">On Average makes 4-5 memory accesses on TLB miss</li>
+	    </ul>
+          </section>
+          </section>
+        </section>
+      </div>
+    </div>
+    <script src="../../js/reveal.js"></script>
+    <script>
+      Reveal.initialize();
+    </script>
+  </body>
+</html>

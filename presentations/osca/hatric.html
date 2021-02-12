@@ -1,0 +1,135 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+		<section>
+			<section>
+			<h3>Hardware Translation Coherence for Virtualized Systems</h3>	
+			<p>Zi Yan&ensp;Ján Veselý&ensp;Guilherme Cox<br/>Abhishek Bhattacharjee</p>
+			<small>Rutgers University</small><br/>
+			<small>ISCA 2017</small>
+			</section>
+			<section>
+			<h3>Problem</h3>
+			<ul>
+				<li class="fragment">TLB shootdowns in Virtualized systems</li>
+				<li class="fragment">Have to be perfomed
+					<ol>
+						<li>Memory defragmentation and Creating superpages</li>
+						<li>Page migration in NUMA systems</li>
+						<li>Page remappings in Heterogeneous Memories</li>
+					</ol>
+				</li>
+				<li class="fragment">Handled Synchronously by OS (Software)</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Desirable properties of TLB shootdowns</h3>
+			<ol>
+				<li class="fragment">Precise Invalidations</li>
+				<li class="fragment">Precise target identification</li>
+				<li class="fragment">Lightweight target side handling</li>
+			</ol>
+			</section>
+			<section>
+			<h3>Problems in Virtualized systems</h3>
+			<ol>
+				<li class="fragment">GVP needed for Precise Invalidations</li>
+				<li class="fragment">Hypervisors do imprecise target tracking</li>
+				<li class="fragment">VM exits increase overheads</li>
+			</ol>
+			</section>
+		</section>
+		<section>
+			<section>
+			<h3>Hardware Translation Coherence for Virtualized Systems</h3>	
+			<ul>
+				<li class="fragment">Hardware based translation coherence</li>
+				<li class="fragment">Does TLB coherence on top of Cache coherence</li>
+				<li class="fragment">Adds Co-tags to translation structures</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Co-tags</h3>	
+			<ul>
+				<li class="fragment">Stores SPA of Nested page table entries</li>
+				<li class="fragment">Helps precisely identify invalidation entries</li>
+				<li class="fragment">Only store part of the SPA to reduce area</li>
+				<li class="fragment">They use 2 Byte co-tags</li>
+				<li class="fragment">All PTEs in same cache line have same co-tags</li>
+				<li class="fragment">PTW loads the Co-tags during page walks</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Co-tags</h3>
+			<img style="width:90%;" src="images/hatric/cotag.jpg"/>
+			</section>
+			<section>
+			<h3>Modification to cache coherence protocol</h3>
+			<ul>
+				<li class="fragment">Modify the Directory based protocol</li>
+				<li class="fragment">Tracks which lines are from page table pages using 1 bit</li>
+				<li class="fragment">Coherence message relayed to Translation structures</li>
+				<li class="fragment">TLBs invalidate entries with matching co-tags</li>
+				<li class="fragment">Sharer's list interpreted differently for PTE cache lines</li>
+				<li class="fragment">For Co-tag lookup, the directory entry also store set numebers for all 8 PTE entries</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Modification to cache coherence protocol</h3>
+			<img style="width:60%;" src="images/hatric/directory.jpg"/>
+			</section>
+			<section>
+			<h3>Lazy sharer list updation</h3>
+			<img style="width:60%;" src="images/hatric/lazy.jpg"/>
+			</section>
+			<section>
+			<h3>Benefits</h3>
+			<ol>
+				<li class="fragment">Nested page table changes done entirely in Hardware</li>
+				<li class="fragment">No IPIs, No VM intervention and No invlpg instructions</li>
+				<li class="fragment">Rely on existing cache coherence protocols</li>
+				<li class="fragment">Permits selective TLB flushes</li>
+			</ol>
+			</section>
+			<section>
+			<h3>Limitations</h3>
+			<ol>
+				<li class="fragment">Directory entry evictions cause TLB backinvalidations</li>
+				<li class="fragment">Only works for Host page table changes</li>
+			</ol>
+			</section>
+		</section>
+		<section>
+			<section>
+			<h3>Evaluations</h3>
+			<ul>
+				<li class="fragment">Using a trace based simulator</li>
+				<li class="fragment">Evaluation using KVM and Xen</li>
+				<li class="fragment">Trace collected on Real system using Pin</li>
+				<li class="fragment">Simulates high bandwidth Die Stacked DRAM</li>
+				<li class="fragment">Use benchmarks from PARSEC, CloudSuite and SPEC</li>
+				<li class="fragment">Use CACTI for energy measurements</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Conclusions</h3>
+			<ul>
+				<li class="fragment">0.2% area increase in all CPUs</li>
+				<li class="fragment">Reduces runtime to 50-80% of runtime compared to baseline</li>
+				<li class="fragment">5-10% perf boost compared to UNITD++ while being energy efficient</li>
+			</ul>
+			</section>
+		</section>
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>
