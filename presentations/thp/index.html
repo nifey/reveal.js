@@ -1,0 +1,146 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="../../css/reveal.css">
+		<link rel="stylesheet" href="../../css/theme/simple.css">
+	</head>
+	<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+			<h3>Huge pages in Linux</h3>	
+			</section>
+		<section>
+			<section>
+			<h3>A primer on Virtual memory</h3>
+			</section>
+			<section>
+			<h3>Virtual Memory</h3>
+			<ul>
+				<li class="fragment">One of the core functions of an Operating System</li>
+				<li class="fragment">Hides the complexities of memory from the programmer</li>
+				<li class="fragment">Provides isolation between processes</li>
+				<li class="fragment">Allows enforcing permissions</li>
+				<li class="fragment">Allows execution of programs which require large memory</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Paging</h3>
+			<ul>
+				<li class="fragment">Technique used by modern OSes to implement virtual memory</li>
+				<li class="fragment">Physical main memory is divided into frames</li>
+				<li class="fragment">Address space of the process is divided into pages</li>
+				<li class="fragment">Pages are mapped onto frames</li>
+				<li class="fragment">Needs address translation from page number to frame number</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Paging</h3>
+			<img src="images/vmem.svg"/>
+			</section>
+			<section>
+			<h3>Translation Lookaside Buffer (TLB)</h3>
+			<ul>
+				<li class="fragment">We need to do address translation fast (as it is needed for every memory access)</li>
+				<li class="fragment">TLB is a small cache of address translation</li>
+				<li class="fragment">Problem is that it is small</li>
+				<li class="fragment">TLB misses are costly (due to page walks)</li>
+			</ul>
+			</section>
+		</section>	
+		<section>
+			<section>
+			<h3>Huge pages</h3>
+			</section>
+			<section>
+			<h3>What are huge pages?</h3>
+			<ul>
+				<li class="fragment">x86 archtecture supports 4KB, 2MB and 1GB pages</li>
+				<li class="fragment">But 4KB is the default page size</li>
+				<li class="fragment">Increases TLB reach and Reduces TLB misses</li>
+				<li class="fragment">Gives performance benefit for memory intensive applications</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Challenges of supporting huge pages</h3>
+			<ul>
+				<li class="fragment">Fragmentation</li>
+				<li class="fragment">Permission changes</li>
+				<li class="fragment">Need to identify the regions that benefits from using huge pages</li>
+			</ul>
+			</section>
+		</section>	
+		<section>
+			<section>
+			<h3>Huge pages in Linux</h3>
+			<p>Linux gives two ways to use huge pages</p>
+			<ol>
+				<li class="fragment">Libhugetlbfs</li>
+				<li class="fragment">Transparent Huge Pages</li>
+			</ol>
+			</section>
+			<section>
+			<h3>libhugetlbfs</h3>
+			<ul>
+				<li class="fragment">Allows us to reserve some space for huge pages</li>
+				<li class="fragment">Program can explicitly request for huge pages using MAP_HUGETLB flag in mmap syscall</li>
+				<li class="fragment">To view reserved space
+				<pre><code class="bash">
+cat /proc/meminfo | grep Huge
+				</code></pre>
+				</li>
+				<li class="fragment">To reserve space for hugepages
+				<pre><code class="bash">
+echo 20 > /sys/kernel/mm/hugepages/hugepages-{size}/nr_hugepages
+				</code></pre>
+				</li>
+			</ul>
+			</section>
+			<section>
+			<h3>Small demo of libhugetlbfs</h3>
+					<p><a href="hugepage.c">Demo code</a></p>
+			</section>
+			<section>
+			<h3>Transparent Huge pages (THP)</h3>
+			<ul>
+				<li class="fragment">Kernel tries to allocate Huge pages whenever possible</li>
+				<li class="fragment">A daemon called khugepaged does defragmentation in the background</li>
+				<li class="fragment">Challenge here is to identify address range that benefits from hugepages</li>
+				<li class="fragment">To get more information about THP
+				<pre><code class="bash">
+cd /sys/kernel/mm/transparent_hugepage/
+				</code></pre>
+				</li>
+			</ul>
+			</section>
+		</section>	
+		<section>
+			<section>
+			<h3>Huge pages problems</h3>
+			<p>Inspite of the performance benefits, many blogs recommend turning THP off, on systems running production applications</p>
+			<ul>
+				<li class="fragment">This is to avoid tail latencies due to page migration</li>
+				<li class="fragment">Huge pages also makes side and covert channels easy to create</li>
+			</ul>
+			</section>
+		</section>	
+		<section>
+			<section>
+				<h2>Thank you</h2>
+				<h2>Questions?</h2>
+			</section>
+			<section>
+				<h2>References</h2>
+				<ul>
+					<li><a href="https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt">Libhugetlbfs</a></li>
+					<li><a href="https://www.kernel.org/doc/Documentation/vm/transhuge.txt">THP</a></li>
+				</ul>
+			</section>
+		</section>
+		</div>
+	</div>
+	<script src="../../js/reveal.js"></script>
+	<script>
+		Reveal.initialize();
+	</script>
+	</body>
+</html>
