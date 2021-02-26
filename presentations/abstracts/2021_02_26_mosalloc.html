@@ -1,0 +1,151 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="../../css/reveal.css" />
+    <link rel="stylesheet" href="../../css/theme/simple.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+		<h3>Predicting Execution Times With Partial</br> Simulations in Virtual Memory Research: Why and How</h3>
+	  <p>Mohammad Agbarya&sup1; Idan Yaniv&sup1;</br> Jayneel Gandhi&sup2; Dan Tsafrir&sup1;&sup2;</p>
+	  <small>&sup1;Technion-Israel Instituite of Technology &sup2;VMWare Research</small>
+        </section>
+        <section>
+          <section>
+            <h3>Virtual memory research</h3>
+	    <ul class="fragment">
+		    <li>
+			    Reduce the address translation overhead
+		    </li>
+		    <li>
+			    Alternate TLB designs
+		    </li>
+		    <li>
+			    Use of huge pages
+		    </li>
+	    </ul>
+          </section>
+          <section>
+            <h3>Performance evaluation in Virtual memory research</h3>
+            <ol>
+              <li class="fragment">
+		      <strike>Synthesize hardware</strike>
+		      <ul>
+			      <li class="fragment">
+				      Costly
+			      </li>
+		      </ul>
+              </li>
+              <li class="fragment">
+		      Full System simulation
+		      <ul>
+			      <li class="fragment">
+				      Models caches, CPU, TLB, etc
+			      </li>
+			      <li class="fragment">
+				      Outputs <b>application runtime</b> and other metrics
+			      </li>
+			      <li class="fragment">
+				      Very slow (weeks, months) for <i>large memory</i> workloads
+			      </li>
+		      </ul>
+              </li>
+              <li class="fragment">
+		      Partial simulation
+              </li>
+            </ol>
+          </section>
+	  <section>
+            <h3>Partial simulation</h3>
+            <ul>
+              <li class="fragment">
+		      Simulates only the TLB and memory hierarchy
+              </li>
+              <li class="fragment">
+		      Ouputs TLB metrics
+              </li>
+              <li class="fragment">
+		      Uses a model to predict the application runtime
+              </li>
+              <li class="fragment">
+		      Widely used in VM research
+              </li>
+            </ul>
+	    <img class="fragment" src="images/mosalloc_fullvspart.jpg"/>
+          </section>
+          <section>
+            <h3>Linear model</h3>
+	    <img class="fragment" src="images/mosalloc_linmodel.jpg"/>
+	      <ul>
+		      <li class="fragment">
+			      Metrics used: TLB hit/miss, Page walk cycles
+		      </li>
+		      <li class="fragment">
+			      Models differ in the constants
+		      </li>
+		      <li class="fragment">
+			      2 (R,M) points measured using Performance counters
+		      </li>
+		      <li class="fragment">
+			      Tied to a processor
+		      </li>
+		      <li class="fragment">
+			      Used widely but <b>Not validated</b>
+		      </li>
+            </ul>
+          </section>
+          <section>
+            <h3>Contributions of this paper</h3>
+	      <ol>
+		      <li class="fragment">
+			      Mosaic allocator
+			      <ul>
+				      <li class="fragment">
+					      Used to take multiple (R,M) measurements
+				      </li>
+				      <li class="fragment">
+					      Uses a "Mosaic" of 4KB and 2MB pages
+				      </li>
+			      </ul>
+		      </li>
+		      <li class="fragment">
+			      Study accuracy of linear models using Mosalloc
+			      <ul>
+				      <li class="fragment">
+					      models deviate by 25%-192%
+				      </li>
+				      <li class="fragment">
+					      Some conservative, Some optimistic
+				      </li>
+			      </ul>
+		      </li>
+		      <li class="fragment">
+			      Propose Mosmodel
+			      <ul>
+				      <li class="fragment">
+					      Uses multiple (R,M) measurements
+				      </li>
+				      <li class="fragment">
+					      Third degree polynomial in three variables (TLB Hit, Miss, Page walk cycles)
+				      </li>
+				      <li class="fragment">
+					      Relative error &lt; 3%
+				      </li>
+			      </ul>
+		      </li>
+             </ol>
+          </section>
+          <section>
+            <h3>Mosmodel</h3>
+	    <img class="fragment" src="images/mosalloc_mosmodel.jpg"/>
+          </section>
+        </section>
+      </div>
+    </div>
+    <script src="../../js/reveal.js"></script>
+    <script>
+      Reveal.initialize();
+    </script>
+  </body>
+</html>
