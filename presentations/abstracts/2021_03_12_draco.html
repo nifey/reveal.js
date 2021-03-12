@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Abstracts</title>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../../css/reveal.css"/>
+
+<link rel="stylesheet" href="../../css/theme/simple.css" id="theme"/>
+
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<section id="slide-org91e4c7c">
+<h2 id="org91e4c7c">Draco: Architectural and Operating System Support for System Call Security</h2>
+<p>
+Dimitrios Skarlatos, Qingrong Chen, Jianyan Chen  Tianyin Xu, Josep Torrellas
+</p>
+
+<p>
+<code>University of Illinois at Urbana-Champaign</code>
+</p>
+</section>
+</section>
+<section>
+<section id="slide-orgba396bc">
+<h3 id="orgba396bc">Syscall checking</h3>
+<ul>
+<li class="fragment appear">To prevent Untrusted user process from attacking the OS</li>
+<li class="fragment appear">Done at runtime</li>
+<li class="fragment appear">Eg: Seccomp (Linux), Tame, Pledge(OpenBSD), System Call Disable Policy (Windows)</li>
+
+</ul>
+</section>
+<section id="slide-org3cc152a">
+<h4 id="org3cc152a">Seccomp</h4>
+<ul>
+<li class="fragment appear">Seccomp (Secure Computing) module in Linux</li>
+<li class="fragment appear">Used for isolation and containerization (Docker, Kubernetes, SystemD, etc)</li>
+<li class="fragment appear">Seccomp profiles are BPF programs</li>
+<li class="fragment appear">Checked on every syscall</li>
+<li class="fragment appear">Syscall ID and arguments are checked</li>
+
+</ul>
+</section>
+<section id="slide-org150caf9">
+<h4 id="org150caf9">Overheads of Seccomp</h4>
+<ul>
+<li class="fragment appear">Performs rule based checking</li>
+<li class="fragment appear">"Long list of if statements executed in sequence"</li>
+<li class="fragment appear">High overheads due to checking every syscall</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org17e3cb3">
+<h3 id="org17e3cb3">Draco</h3>
+<ul>
+<li class="fragment appear">Tries to reduce the overheads of Syscall checking</li>
+<li class="fragment appear">Takes advantage of <b>Syscall Locality</b>
+<ul>
+<li>"20 syscalls account for 86% of all calls"</li>
+<li>Syscalls are often executed with the same set of arguments</li>
+
+</ul></li>
+<li class="fragment appear">Making the common case faster
+<ul>
+<li>Most syscall invocations are valid</li>
+
+</ul></li>
+<li class="fragment appear">Caches recently validated syscall and arguments</li>
+<li class="fragment appear">Avoids rechecking for cache hits</li>
+
+</ul>
+</section>
+<section id="slide-org39eb0dc">
+<h4 id="org39eb0dc">Draco Syscall checking</h4>
+
+<div id="orgf7c2904" class="figure">
+<p><img src="./images/draco.png" /> 
+</p>
+</div>
+</section>
+<section id="slide-orgae91ca1">
+<h4 id="orgae91ca1">Draco in Software</h4>
+<ul>
+<li class="fragment appear">Syscall Permission Table (SPT)
+<ul>
+<li>per-process table</li>
+<li>One bit for each syscall</li>
+
+</ul></li>
+<li class="fragment appear">Validated Arguments Table (VAT)
+<ul>
+<li>OS maintained, per-process table</li>
+<li>VAT access requires additional memory accesses</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-orgceeaa12">
+<h4 id="orgceeaa12">Draco in Hardware</h4>
+<ul>
+<li class="fragment appear">Syscall Lookaside Buffer (SLB)
+<ul>
+<li>Caches recently checked syscall and arguments</li>
+
+</ul></li>
+<li class="fragment appear">Syscall Target Buffer (STB)
+<ul>
+<li>Preloads SLB by prediction</li>
+<li>VAT access off critical path</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgb7c70f1">
+<h3 id="orgb7c70f1">Evaluations</h3>
+<ul>
+<li class="fragment appear">Full system simulation using Simics</li>
+<li class="fragment appear">Benchmarks
+<ul>
+<li>Micro : benchmarks from Unixbench, Sysbench, GUPS, etc</li>
+<li>Macro : HTTPD, NGINX, Redis, Cassandra, etc</li>
+
+</ul></li>
+<li class="fragment appear">Results (over insecure baseline)
+<ul>
+<li>Seccomp : 1.14 and 1.25 for micro and macro</li>
+<li>Draco in Software: 1.10 and 1.18 for micro and macro</li>
+<li>Draco in Hardware: less than 1%</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../../js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>
