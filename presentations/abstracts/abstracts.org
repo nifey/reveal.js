@@ -1,0 +1,117 @@
+#+TITLE: Abstracts
+#+REVEAL_ROOT: ../../
+#+REVEAL_THEME: simple
+#+REVEAL_HLEVEL: 2
+#+REVEAL_DEFAULT_FRAG_STYLE: appear
+#+OPTIONS: toc:nil num:nil
+
+* Abstracts
+** Draco: Architectural and Operating System Support for System Call Security
+  Dimitrios Skarlatos, Qingrong Chen, Jianyan Chen  Tianyin Xu, Josep Torrellas
+  
+  ~University of Illinois at Urbana-Champaign~
+*** Syscall checking
+    #+ATTR_REVEAL: :frag (appear)
+    - To prevent Untrusted user process from attacking the OS
+    - Done at runtime
+    - Eg: Seccomp (Linux), Tame, Pledge(OpenBSD), System Call Disable Policy (Windows)
+**** Seccomp
+    #+ATTR_REVEAL: :frag (appear)
+    - Seccomp (Secure Computing) module in Linux
+    - Used for isolation and containerization (Docker, Kubernetes, SystemD, etc)
+    - Seccomp profiles are BPF programs
+    - Checked on every syscall
+    - Syscall ID and arguments are checked
+**** Overheads of Seccomp
+    #+ATTR_REVEAL: :frag (appear)
+    - Performs rule based checking
+    - "Long list of if statements executed in sequence"
+    - High overheads due to checking every syscall
+*** Draco
+    #+ATTR_REVEAL: :frag (appear)
+    - Tries to reduce the overheads of Syscall checking
+    - Takes advantage of *Syscall Locality*
+      - "20 syscalls account for 86% of all calls"
+      - Syscalls are often executed with the same set of arguments
+    - Making the common case faster
+      - Most syscall invocations are valid
+    - Caches recently validated syscall and arguments
+    - Avoids rechecking for cache hits
+**** Draco Syscall checking
+     [[file:./images/draco.png]] 
+**** Draco in Software
+    #+ATTR_REVEAL: :frag (appear)
+    - Syscall Permission Table (SPT)
+      - per-process table
+      - One bit for each syscall
+    - Validated Arguments Table (VAT)
+      - OS maintained, per-process table
+      - VAT access requires additional memory accesses
+**** Draco in Hardware
+    #+ATTR_REVEAL: :frag (appear)
+    - Syscall Lookaside Buffer (SLB)
+      - Caches recently checked syscall and arguments 
+    - Syscall Target Buffer (STB)
+      - Preloads SLB by prediction
+      - VAT access off critical path
+*** Evaluations
+    #+ATTR_REVEAL: :frag (appear)
+    - Full system simulation using Simics
+    - Benchmarks
+      - Micro : benchmarks from Unixbench, Sysbench, GUPS, etc
+      - Macro : HTTPD, NGINX, Redis, Cassandra, etc
+    - Results (over insecure baseline)
+      - Seccomp : 1.14 and 1.25 for micro and macro
+      - Draco in Software: 1.10 and 1.18 for micro and macro
+      - Draco in Hardware: less than 1%
+** Hardware-based Always-On Heap Memory Safety
+   Yonghae Kim^1, Jaekyu Lee^2, Hyesoon Kim^1
+   
+   Georgia Institute of Technology^1
+   Arm Research^2
+*** Heap Memory Safety
+    - "Illicit use of pointers" - cause of memory safety bugs
+    - Heap exploits tries to use Double frees, Use after frees, etc
+    - Need to do Pointer Bounds check
+      - Storing metadata for each pointer
+      - Checking bounds on every pointer dereference
+**** Challenges in Pointer Bounds checking
+     - Extra instructions overhead
+       - Check instructions
+       - instructions for metadata propagation
+     - Complex metadata addressing
+       - Intel MPX uses 2 level hierarchical table
+       - Metadata access involves (approx)
+         - 3 register to register moves
+         - 3 shift operation
+         - 2 memory loads
+**** ARM Pointer Authentication (PA)
+     - ISA extension
+     - Generates PAC (PA code) using the pointer and context
+     - Signs it with a hardware key
+     - Stores PAC in higher unused bits of a pointer
+     - Used to check pointer integrity using extra instructions
+**** ARM Pointer Authentication (PA) example
+     [[file:./images/screenshot-01.png]] 
+*** AOS: Always On Heap memory safety
+    1. Pointer signing
+       - Uses ARM PA to do selective bounds checking
+       - Sign and store metadata for malloc allocated pointers
+    2. Bounds checking
+       - If the pointer is signed, do a bounds check
+       - No need for check instructions
+       - Introduce memory check unit to do the check
+    3. Metadata management
+       - Uses a per-process Hash Bounds table with PAC as the key
+**** AOS
+     - Stores 8 B metadata for each pointer
+     - Hash table access is faster than hierarchical table
+     - Detects Use after frees and double frees
+       - Frees will remove metadata but not sign
+       - Subsequent frees will cause exceptions
+       - Subsequent dereferences will cause exceptions
+*** Evaluations
+    - Using SPEC2006 benchmarks
+    - Modified Gem5 simulator
+    - Watchdog incurs 19.4 % overheads
+    - AOS incurs 8.4 % performance overheads

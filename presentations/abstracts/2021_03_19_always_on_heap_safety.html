@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Abstracts</title>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../../css/reveal.css"/>
+
+<link rel="stylesheet" href="../../css/theme/simple.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../../css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<section id="slide-org39a733f">
+<h2 id="org39a733f">Hardware-based Always-On Heap Memory Safety</h2>
+<p>
+Yonghae Kim<sup>1</sup>, Jaekyu Lee<sup>2</sup>, Hyesoon Kim<sup>1</sup>
+</p>
+
+<p>
+Georgia Institute of Technology<sup>1</sup>
+Arm Research<sup>2</sup>
+</p>
+</section>
+</section>
+<section>
+<section id="slide-orgf977665">
+<h3 id="orgf977665">Heap Memory Safety</h3>
+<ul>
+<li>"Illicit use of pointers" - cause of memory safety bugs</li>
+<li>Heap exploits tries to use Double frees, Use after frees, etc</li>
+<li>Need to do Pointer Bounds check
+<ul>
+<li>Storing metadata for each pointer</li>
+<li>Checking bounds on every pointer dereference</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org76587f0">
+<h4 id="org76587f0">Challenges in Pointer Bounds checking</h4>
+<ul>
+<li>Extra instructions overhead
+<ul>
+<li>Check instructions</li>
+<li>instructions for metadata propagation</li>
+
+</ul></li>
+<li>Complex metadata addressing
+<ul>
+<li>Intel MPX uses 2 level hierarchical table</li>
+<li>Metadata access involves (approx)
+<ul>
+<li>3 register to register moves</li>
+<li>3 shift operation</li>
+<li>2 memory loads</li>
+
+</ul></li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-orgb057cf5">
+<h4 id="orgb057cf5">ARM Pointer Authentication (PA)</h4>
+<ul>
+<li>ISA extension</li>
+<li>Generates PAC (PA code) using the pointer and context</li>
+<li>Signs it with a hardware key</li>
+<li>Stores PAC in higher unused bits of a pointer</li>
+<li>Used to check pointer integrity using extra instructions</li>
+
+</ul>
+</section>
+<section id="slide-org246d2e1">
+<h4 id="org246d2e1">ARM Pointer Authentication (PA) example</h4>
+
+<div id="orgfd91695" class="figure">
+<p><img src="./images/aos_heap_safety.png" alt="screenshot-01.png" /> 
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org183b284">
+<h3 id="org183b284">AOS: Always On Heap memory safety</h3>
+<ol>
+<li>Pointer signing
+<ul>
+<li>Uses ARM PA to do selective bounds checking</li>
+<li>Sign and store metadata for malloc allocated pointers</li>
+
+</ul></li>
+<li>Bounds checking
+<ul>
+<li>If the pointer is signed, do a bounds check</li>
+<li>No need for check instructions</li>
+<li>Introduce memory check unit to do the check</li>
+
+</ul></li>
+<li>Metadata management
+<ul>
+<li>Uses a per-process Hash Bounds table with PAC as the key</li>
+
+</ul></li>
+
+</ol>
+</section>
+<section id="slide-org490334b">
+<h4 id="org490334b">AOS</h4>
+<ul>
+<li>Stores 8 B metadata for each pointer</li>
+<li>Hash table access is faster than hierarchical table</li>
+<li>Detects Use after frees and double frees
+<ul>
+<li>Frees will remove metadata but not sign</li>
+<li>Subsequent frees will cause exceptions</li>
+<li>Subsequent dereferences will cause exceptions</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org18d998e">
+<h3 id="org18d998e">Evaluations</h3>
+<ul>
+<li>Using SPEC2006 benchmarks</li>
+<li>Modified Gem5 simulator</li>
+<li>Watchdog incurs 19.4 % overheads</li>
+<li>AOS incurs 8.4 % performance overheads</li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../../js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>
