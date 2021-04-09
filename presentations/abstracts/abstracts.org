@@ -92,7 +92,7 @@
      - Stores PAC in higher unused bits of a pointer
      - Used to check pointer integrity using extra instructions
 **** ARM Pointer Authentication (PA) example
-     [[file:./images/screenshot-01.png]] 
+     [[file:./images/aos_heap_safety.png]]
 *** AOS: Always On Heap memory safety
     1. Pointer signing
        - Uses ARM PA to do selective bounds checking
@@ -115,3 +115,79 @@
     - Modified Gem5 simulator
     - Watchdog incurs 19.4 % overheads
     - AOS incurs 8.4 % performance overheads
+** GenASM: A High-Performance, Low-Power Approximate String Matching Acceleration Framework for Genome Sequence Analysis 
+   [[file:./images/genasm_authors.png]] 
+*** Genome Sequence Analysis
+**** Genome
+     - Nucleic acid sequence (DNA, RNA)
+     - Double helix structure with Base pairs (A,T,C,G)
+     - Blueprint of life
+     - Unique to every individual organism
+     - Represented as a string
+**** Genome sequence analysis
+     - Analysing the features, structure, function and evolution of Genome
+     - Applications (Why do GSA?)
+       1. Personalized medicine
+       2. Evolutionary theory
+       3. Forensics
+**** Read Mapping
+     - Reading the Genome involves
+       1. Cut DNA into fragments
+       2. GS machines read random fragments called "Reads"
+       3. "Reads" mapped to a Reference genome
+     - Read mapping
+       - Finding possible locations of the read sequence
+         in the reference genome
+       - Approximate String Matching with Reference genome
+**** Approximate String Matching (ASM)
+     - Why approximate?
+       - Genetic mutations and variations
+       - Sequencing errors
+     - Why is ASM important?
+       - Used in multiple stages of Read mapping
+       - Major Bottleneck in GSA
+       - Sequencing machines are getting faster => generate reads faster
+*** Approximate String Matching (ASM)
+**** Formal Definition
+     - Input:
+       1. Query read sequence Q=[q1 q2 ... qm]
+       2. Reference text sequence T=[t1 t2 ... tn] (n>m)
+       3. Edit distance threshold E
+     - Output:
+       - a set of approximate matches of Q in T (allowing for at most E differences)
+     - Edits could be
+       - insertions
+       - deletions
+       - substituitions
+**** Algorithms
+     - Typically implemented as Dynamic programming algorithm
+     - Existing DP algorithms are Quadratic in time and space complexity
+     - Bitap Algorithm
+       * Uses bitwise operations
+       * suffers from limitations like
+         - Limited by word size
+         - Limited compute parallelism
+*** GenASM
+**** Contributions
+     - Modify Bitap algorithm for long reads and parallelism
+     - Design a hardware accelerator for Bitap algorithm
+     - Evaluate the accelerator in three usecases
+       1. Read alignment
+       2. Pre alignment filtering
+       3. Edit distance calculation
+**** Hardware design
+     - Distance calculation hardware
+       - Implemented as a cyclic systolic array
+       - Systolic array
+         - Consists of network of processing elements (PEs)
+         - Each PE consist of
+           1. Processing logic
+           2. Flip Flop based storage logic
+       - Removes data dependency limitation of Bitap algorithm
+**** Evaluations
+     - Edit distance b/w two 1Mbp sequences
+       - Compared with State-of-the-art Edlib
+       - GenASM gives 262-5413x speedup over Edlib
+       - Power consumption reduced by 582x
+     - Primary Source of improvement: Co-design hardware and software
+     - Fast, Area and power efficient accelerator for ASM

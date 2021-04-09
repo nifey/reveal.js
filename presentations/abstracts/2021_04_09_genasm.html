@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Abstracts</title>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../../css/reveal.css"/>
+
+<link rel="stylesheet" href="../../css/theme/simple.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../../css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<section id="slide-orgf7b9a7f">
+<h2 id="orgf7b9a7f">GenASM: A High-Performance, Low-Power Approximate String Matching Acceleration Framework for Genome Sequence Analysis</h2>
+
+<div id="org23f51a0" class="figure">
+<p><img src="./images/genasm_authors.png" alt="genasm_authors.png" /> 
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org8a9b5ee">
+<h3 id="org8a9b5ee">Genome Sequence Analysis</h3>
+<div class="outline-text-3" id="text-org8a9b5ee">
+</div>
+</section>
+<section id="slide-org4588fe1">
+<h4 id="org4588fe1">Genome</h4>
+<ul>
+<li>Nucleic acid sequence (DNA, RNA)</li>
+<li>Double helix structure with Base pairs (A,T,C,G)</li>
+<li>Blueprint of life</li>
+<li>Unique to every individual organism</li>
+<li>Represented as a string</li>
+
+</ul>
+</section>
+<section id="slide-org485a0c0">
+<h4 id="org485a0c0">Genome sequence analysis</h4>
+<ul>
+<li>Analysing the features, structure, function and evolution of Genome</li>
+<li>Applications (Why do GSA?)
+<ol>
+<li>Personalized medicine</li>
+<li>Evolutionary theory</li>
+<li>Forensics</li>
+
+</ol></li>
+
+</ul>
+</section>
+<section id="slide-org51fa24f">
+<h4 id="org51fa24f">Read Mapping</h4>
+<ul>
+<li>Reading the Genome involves
+<ol>
+<li>Cut DNA into fragments</li>
+<li>GS machines read random fragments called "Reads"</li>
+<li>"Reads" mapped to a Reference genome</li>
+
+</ol></li>
+<li>Read mapping
+<ul>
+<li>Finding possible locations of the read sequence
+in the reference genome</li>
+<li>Approximate String Matching with Reference genome</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-orgfb1514d">
+<h4 id="orgfb1514d">Approximate String Matching (ASM)</h4>
+<ul>
+<li>Why approximate?
+<ul>
+<li>Genetic mutations and variations</li>
+<li>Sequencing errors</li>
+
+</ul></li>
+<li>Why is ASM important?
+<ul>
+<li>Used in multiple stages of Read mapping</li>
+<li>Major Bottleneck in GSA</li>
+<li>Sequencing machines are getting faster =&gt; generate reads faster</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org2b0e23c">
+<h3 id="org2b0e23c">Approximate String Matching (ASM)</h3>
+<div class="outline-text-3" id="text-org2b0e23c">
+</div>
+</section>
+<section id="slide-org10f5894">
+<h4 id="org10f5894">Formal Definition</h4>
+<ul>
+<li>Input:
+<ol>
+<li>Query read sequence Q=[q1 q2 &#x2026; qm]</li>
+<li>Reference text sequence T=[t1 t2 &#x2026; tn] (n&gt;m)</li>
+<li>Edit distance threshold E</li>
+
+</ol></li>
+<li>Output:
+<ul>
+<li>a set of approximate matches of Q in T (allowing for at most E differences)</li>
+
+</ul></li>
+<li>Edits could be
+<ul>
+<li>insertions</li>
+<li>deletions</li>
+<li>substituitions</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org53439d2">
+<h4 id="org53439d2">Algorithms</h4>
+<ul>
+<li>Typically implemented as Dynamic programming algorithm</li>
+<li>Existing DP algorithms are Quadratic in time and space complexity</li>
+<li>Bitap Algorithm
+<ul>
+<li>Uses bitwise operations</li>
+<li>suffers from limitations like
+<ul>
+<li>Limited by word size</li>
+<li>Limited compute parallelism</li>
+
+</ul></li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orge9e4b57">
+<h3 id="orge9e4b57">GenASM</h3>
+<div class="outline-text-3" id="text-orge9e4b57">
+</div>
+</section>
+<section id="slide-org9dc8a83">
+<h4 id="org9dc8a83">Contributions</h4>
+<ul>
+<li>Modify Bitap algorithm for long reads and parallelism</li>
+<li>Design a hardware accelerator for Bitap algorithm</li>
+<li>Evaluate the accelerator in three usecases
+<ol>
+<li>Read alignment</li>
+<li>Pre alignment filtering</li>
+<li>Edit distance calculation</li>
+
+</ol></li>
+
+</ul>
+</section>
+<section id="slide-orge842848">
+<h4 id="orge842848">Hardware design</h4>
+<ul>
+<li>Distance calculation hardware
+<ul>
+<li>Implemented as a cyclic systolic array</li>
+<li>Systolic array
+<ul>
+<li>Consists of network of processing elements (PEs)</li>
+<li>Each PE consist of
+<ol>
+<li>Processing logic</li>
+<li>Flip Flop based storage logic</li>
+
+</ol></li>
+
+</ul></li>
+<li>Removes data dependency limitation of Bitap algorithm</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org24ecd69">
+<h4 id="org24ecd69">Evaluations</h4>
+<ul>
+<li>Edit distance b/w two 1Mbp sequences
+<ul>
+<li>Compared with State-of-the-art Edlib</li>
+<li>GenASM gives 262-5413x speedup over Edlib</li>
+<li>Power consumption reduced by 582x</li>
+
+</ul></li>
+<li>Primary Source of improvement: Co-design hardware and software</li>
+<li>Fast, Area and power efficient accelerator for ASM</li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../../js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>
