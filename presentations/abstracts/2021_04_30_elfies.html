@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Abstracts</title>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../../css/reveal.css"/>
+
+<link rel="stylesheet" href="../../css/theme/simple.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../../css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<section id="slide-orgd436028">
+<h2 id="orgd436028">ELFies: Executable Region Checkpoints for Performance Analysis and Simulation</h2>
+<p>
+Harish Patil, Alexander Isaev, Wim Heirman
+</p>
+
+<p>
+<code>Intel Corporation</code>
+</p>
+
+<p>
+Alen Sabu, Ali Hajiabadi, Trevor E. Carlson
+</p>
+
+<p>
+<code>National University of Singapore</code>
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org42720df">
+<h3 id="org42720df">Workload characterization</h3>
+<ul>
+<li>To understand the behaviour of a system or a program</li>
+<li>General approaches
+<ul>
+<li>Performance counters with Native execution</li>
+<li>Dynamic Binary Instrumentation (Intel Pin)</li>
+<li>Performance simulation</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org775ce58">
+<h4 id="org775ce58">Regions of interest</h4>
+<ul>
+<li>For long running applications, we find <b>Representative Regions</b></li>
+<li>Detailed analysis performed on these regions</li>
+<li>How to find representative regions?
+<ul>
+<li>Phase based Sampling techniques</li>
+
+</ul></li>
+<li>Requirements
+<ul>
+<li>Need a way to share the ROIs</li>
+<li>Every subsequent runs should reach the ROIs</li>
+<li>Need to restrict analysis to ROIs</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org0404948">
+<h3 id="org0404948">PinPlay</h3>
+<ul>
+<li>Pin based tool for Dynamic Program Slicing</li>
+<li>Input: Binary + Binary's input + Region information</li>
+<li>Output: <code>Pinballs</code> for every region of interest</li>
+<li>Pinball is used to replay region with <code>constrained</code> determinism</li>
+
+</ul>
+</section>
+<section id="slide-org7bdf794">
+<h4 id="org7bdf794">PinPlay</h4>
+<ul>
+<li>Pinball stores
+<ul>
+<li>Memory image</li>
+<li>Register values of each thread</li>
+<li>Syscall injection data</li>
+<li>Info about shared memory access order</li>
+
+</ul></li>
+<li>Limitations
+<ul>
+<li>Works only with Pin based simulators</li>
+<li>Not as fast as native execution</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org67c41ed">
+<h3 id="org67c41ed">ELFies</h3>
+<ul>
+<li>Standalone executables in ELF format</li>
+<li>Captures the execution of a ROI</li>
+<li>Advantages
+<ul>
+<li>Can be used with any characterization tool</li>
+<li>(Fast) Native execution is possible</li>
+<li>Easily sharable</li>
+
+</ul></li>
+<li>Main contribution: <b>pinball2elf</b>
+<ul>
+<li>Tool to convert pinball to ELF executables</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org09f67f2">
+<h4 id="org09f67f2">ELFies</h4>
+
+<div id="org546148e" class="figure">
+<p><img src="./images/elfies.png" alt="elfies.png" /> 
+</p>
+</div>
+</section>
+<section id="slide-orgadb4c68">
+<h4 id="orgadb4c68">Pinball to ELF conversion</h4>
+<ul>
+<li>Memory pages are mapped to ELF sections</li>
+<li>Adds startup code to
+<ul>
+<li>create threads</li>
+<li>initialize register values</li>
+<li>jump to beginning of actual code</li>
+
+</ul></li>
+<li>Ignores Syscall injection and Shared memory access order
+<ul>
+<li>Leads to non determinism</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-orgad30ea2">
+<h4 id="orgad30ea2">Syscall handling</h4>
+<ul>
+<li>Syscalls executed natively</li>
+<li>Can lead to a different control flow</li>
+<li>File related syscalls are handled
+<ul>
+<li>Files are saved</li>
+<li>Startup code creates file descriptors</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org9f2108c">
+<h4 id="org9f2108c">Graceful exit</h4>
+<ul>
+<li>Uses (PC, Instr. Count) pair to terminate</li>
+<li>Performance counters to count instructions</li>
+<li>Instruction count based termination for deviated control flow</li>
+
+</ul>
+</section>
+<section id="slide-orgc343e87">
+<h4 id="orgc343e87">Evaluations</h4>
+<ul>
+<li>Run SPEC2017 ELFies on Sniper, CoreSim and Gem5 simulators</li>
+<li>High CPI prediction errors for some benchmarks (20-30%)</li>
+<li>Instruction count for multi threaded execution increased due to spin loops</li>
+<li>Main advantage is <code>speed</code>
+<ul>
+<li>Longest benchmark took few weeks on CoreSim</li>
+<li>With ELFie native execution, 10 iterations took less than 1 Hour</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../../js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>

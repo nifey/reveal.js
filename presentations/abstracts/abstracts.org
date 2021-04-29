@@ -191,3 +191,76 @@
        - Power consumption reduced by 582x
      - Primary Source of improvement: Co-design hardware and software
      - Fast, Area and power efficient accelerator for ASM
+** ELFies: Executable Region Checkpoints for Performance Analysis and Simulation
+Harish Patil, Alexander Isaev, Wim Heirman
+
+~Intel Corporation~
+
+Alen Sabu, Ali Hajiabadi, Trevor E. Carlson
+
+~National University of Singapore~
+*** Workload characterization
+    - To understand the behaviour of a system or a program
+    - General approaches
+      - Performance counters with Native execution
+      - Dynamic Binary Instrumentation (Intel Pin)
+      - Performance simulation
+**** Regions of interest
+     - For long running applications, we find *Representative Regions*
+     - Detailed analysis performed on these regions
+     - How to find representative regions?
+       - Phase based Sampling techniques
+     - Requirements
+       - Need a way to share the ROIs
+       - Every subsequent runs should reach the ROIs
+       - Need to restrict analysis to ROIs
+*** PinPlay
+    - Pin based tool for Dynamic Program Slicing
+    - Input: Binary + Binary's input + Region information
+    - Output: ~Pinballs~ for every region of interest
+    - Pinball is used to replay region with ~constrained~ determinism
+**** PinPlay
+    - Pinball stores
+      - Memory image
+      - Register values of each thread
+      - Syscall injection data
+      - Info about shared memory access order
+    - Limitations
+      - Works only with Pin based simulators
+      - Not as fast as native execution
+*** ELFies
+    - Standalone executables in ELF format
+    - Captures the execution of a ROI
+    - Advantages
+      - Can be used with any characterization tool
+      - (Fast) Native execution is possible
+      - Easily sharable
+    - Main contribution: *pinball2elf*
+      - Tool to convert pinball to ELF executables
+**** ELFies
+    [[file:./images/screenshot-01.png]] 
+**** Pinball to ELF conversion
+     - Memory pages are mapped to ELF sections
+     - Adds startup code to
+       - create threads
+       - initialize register values
+       - jump to beginning of actual code
+     - Ignores Syscall injection and Shared memory access order
+       - Leads to non determinism
+**** Syscall handling
+     - Syscalls executed natively
+     - Can lead to a different control flow
+     - File related syscalls are handled
+       - Files are saved
+       - Startup code creates file descriptors
+**** Graceful exit
+     - Uses (PC, Instr. Count) pair to terminate
+     - Performance counters to count instructions
+     - Instruction count based termination for deviated control flow
+**** Evaluations
+     - Run SPEC2017 ELFies on Sniper, CoreSim and Gem5 simulators
+     - High CPI prediction errors for some benchmarks (20-30%)
+     - Instruction count for multi threaded execution increased due to spin loops
+     - Main advantage is ~speed~
+       - Longest benchmark took few weeks on CoreSim
+       - With ELFie native execution, 10 iterations took less than 1 Hour
