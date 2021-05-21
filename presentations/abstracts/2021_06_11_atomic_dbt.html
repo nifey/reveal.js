@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Abstracts</title>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../../css/reveal.css"/>
+
+<link rel="stylesheet" href="../../css/theme/simple.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../../css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<section id="slide-org5ad5f12">
+<h2 id="org5ad5f12">Enhancing Atomic Instruction Emulation for Cross-ISA Dynamic Binary Translation</h2>
+<p>
+Ziyi Zhao<sup>1</sup>, Zhang Jiang<sup>1</sup>, Ying Chen<sup>1</sup>, Xiaoli Gong<sup>1</sup>, Wenwen Wang<sup>2</sup>, Pen-Chung Yew<sup>3</sup>
+</p>
+
+<p>
+<code>Nankai University</code>
+</p>
+
+<p>
+<code>University of Georgia</code>
+</p>
+
+<p>
+<code>University of Minnesota</code>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orge99466f">
+<h3 id="orge99466f">Problem</h3>
+<div class="outline-text-3" id="text-orge99466f">
+</div>
+</section>
+<section id="slide-org4ac7288">
+<h4 id="org4ac7288">Dynamic Binary Translation</h4>
+<ul>
+<li>eg: Qemu, Pico</li>
+<li>Multi threaded, Cross ISA simulation</li>
+<li>Needs emulation of atomic instructions</li>
+
+</ul>
+</section>
+<section id="slide-org6e38187">
+<h4 id="org6e38187">Atomic instructions</h4>
+<ul>
+<li>Load Linked/Store Conditional (LL/SC)
+<ul>
+<li>Linked load and store succeeds only if atomic</li>
+<li>Used in RISC</li>
+<li>Strong atomicity</li>
+
+</ul></li>
+<li>Compare And Swap (CAS)
+<ul>
+<li>Stores only if memory location has expected value</li>
+<li>Used in CISC</li>
+<li>Suffers from ABA problem</li>
+
+</ul></li>
+
+</ul>
+<ul>
+<li class="fragment appear"><b>Need correct and efficient emulation of LL/SC on CAS</b></li>
+
+</ul>
+</section>
+<section id="slide-orgae3945f">
+<h4 id="orgae3945f">Existing approaches</h4>
+<ul>
+<li>Pico-ST
+<ul>
+<li>Instruments every store instruction to check</li>
+<li>High runtime overhead</li>
+
+</ul></li>
+<li>Pico-HTM
+<ul>
+<li>Uses Hardware Transactional Memory</li>
+<li>Code b/w LL and SC is made a transaction</li>
+<li>Not portable</li>
+
+</ul></li>
+<li>Pico-CAS
+<ul>
+<li>Uses CAS instead of SC (slightly incorrect)</li>
+<li>Strong atomicity not guarenteed</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgddbe80a">
+<h3 id="orgddbe80a">Solution</h3>
+<ul>
+<li>Propose two schemes
+<ol>
+<li>Hash table based Store Test (HST)</li>
+<li>Page Protection based Store Test (PST)</li>
+
+</ol></li>
+
+</ul>
+</section>
+<section id="slide-org312cbc1">
+<h4 id="org312cbc1">Hash table based Store Test (HST)</h4>
+<ul>
+<li>Non blocking hash table</li>
+<li>Consists of one field, thread id</li>
+<li>Updated using loads and stores</li>
+
+</ul>
+
+<div id="orgad1d879" class="figure">
+<p><img src="./images/atomic_dbt1.png" style="width:50%"/> 
+</p>
+</div>
+</section>
+<section id="slide-org1afba48">
+<h4 id="org1afba48">Page Protection based Store Test (PST)</h4>
+<ul>
+<li>Uses OS page protection</li>
+<li>Avoids instrumenting every store</li>
+<li>Incurs context switch cost</li>
+
+</ul>
+
+<div id="org739729f" class="figure">
+<p><img src="./images/atomic_dbt2.png" style="width:50%"/> 
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org02c5cad">
+<h3 id="org02c5cad">Evaluation</h3>
+<ul>
+<li>Implemented in Qemu</li>
+<li>Using PARSEC benchmarks</li>
+<li>Emulate ARM (guest) on x86-64 (host)</li>
+<li>Both HST and PST perform correct emulation</li>
+<li>HST has gmean speedup of 2.03x over Pico-ST</li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../../js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>

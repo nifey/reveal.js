@@ -238,7 +238,7 @@ Alen Sabu, Ali Hajiabadi, Trevor E. Carlson
     - Main contribution: *pinball2elf*
       - Tool to convert pinball to ELF executables
 **** ELFies
-    [[file:./images/screenshot-01.png]] 
+    [[file:./images/elfies.png]] 
 **** Pinball to ELF conversion
      - Memory pages are mapped to ELF sections
      - Adds startup code to
@@ -264,3 +264,59 @@ Alen Sabu, Ali Hajiabadi, Trevor E. Carlson
      - Main advantage is ~speed~
        - Longest benchmark took few weeks on CoreSim
        - With ELFie native execution, 10 iterations took less than 1 Hour
+** Enhancing Atomic Instruction Emulation for Cross-ISA Dynamic Binary Translation
+Ziyi Zhao^1, Zhang Jiang^1, Ying Chen^1, Xiaoli Gong^1, Wenwen Wang^2, Pen-Chung Yew^3
+
+~Nankai University~
+
+~University of Georgia~
+
+~University of Minnesota~
+
+*** Problem
+**** Dynamic Binary Translation
+     - eg: Qemu, Pico
+     - Multi threaded, Cross ISA simulation
+     - Needs emulation of atomic instructions
+**** Atomic instructions
+     - Load Linked/Store Conditional (LL/SC)
+       - Linked load and store succeeds only if atomic
+       - Used in RISC
+       - Strong atomicity
+     - Compare And Swap (CAS)
+       - Stores only if memory location has expected value
+       - Used in CISC
+       - Suffers from ABA problem
+     #+ATTR_REVEAL: :frag (appear)
+     - *Need correct and efficient emulation of LL/SC on CAS*
+**** Existing approaches
+     - Pico-ST
+       - Instruments every store instruction to check
+       - High runtime overhead
+     - Pico-HTM
+       - Uses Hardware Transactional Memory
+       - Code b/w LL and SC is made a transaction
+       - Not portable
+     - Pico-CAS
+       - Uses CAS instead of SC (slightly incorrect)
+       - Strong atomicity not guarenteed
+*** Solution
+    - Propose two schemes
+      1. Hash table based Store Test (HST)
+      2. Page Protection based Store Test (PST)
+**** Hash table based Store Test (HST)
+     - Non blocking hash table
+     - Consists of one field, thread id
+     - Updated using loads and stores
+    [[file:./images/atomic_dbt1.png]] 
+**** Page Protection based Store Test (PST)
+     - Uses OS page protection
+     - Avoids instrumenting every store
+     - Incurs context switch cost
+    [[file:./images/atomic_dbt2.png]] 
+*** Evaluation
+    - Implemented in Qemu
+    - Using PARSEC benchmarks
+    - Emulate ARM (guest) on x86-64 (host)
+    - Both HST and PST perform correct emulation
+    - HST has gmean speedup of 2.03x over Pico-ST
