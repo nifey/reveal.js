@@ -1,0 +1,75 @@
+#+TITLE: ILUGC talks
+#+REVEAL_ROOT: ../../
+#+REVEAL_THEME: simple
+#+REVEAL_HLEVEL: 2
+#+REVEAL_DEFAULT_FRAG_STYLE: appear
+#+OPTIONS: toc:nil num:nil
+
+* Talks
+** RSync
+*** You need a backup
+    - 3-2-1 Backup Strategy
+      - Your working copy
+      - Local backup (for quick access)
+      - Remote backup (if we lose both local copy)
+    - Set a system in place
+*** RSync
+    - Written in C
+    - Supports Windows, Linux, OS X, BSD
+    - Multiple GUI Frontends available (GSync, QSync, Zynk, etc)
+    - General format
+      #+BEGIN_SRC bash
+      rsync options /path/to/source/folder /path/to/backup/folder
+      #+END_SRC
+*** What's good?
+    - Uses a diff based transfer algorithm to reduce bandwidth usage
+    - Works over SSH to backup remote files
+    - Good for unidirectional static backups
+*** What's not good?
+    - Cannot be used easily for bi directional transfers
+      - If you modify both copies simultaneously, try [[https://syncthing.net/][Syncthing]] instead
+    - Moved and renamed files will be treated like new files and will be copied again. Some workarounds:
+      - -y --fuzzy option, detects renames within a directory
+      - [[https://lincolnloop.com/blog/detecting-file-moves-renames-rsync/][Using hard links]]
+    - Diff based algorithm does not work well for compressed files
+*** Things to note
+    - *RSync has different behaviour with and without trailing backslash*
+    - Databases need to be dumped to files for RSync to backup
+    - Can be automated using crontab or SystemD timers
+    - Always do a dry run before executing (especially with --delete)
+*** Options
+    |--------+---------------------------------------------|
+    | Option | Used for                                    |
+    |--------+---------------------------------------------|
+    | -a     | preserve user permissions, modified times   |
+    | -r     | to copy recursively                         |
+    | -z     | transfers data in compressed format         |
+    | -vhP   | verbose, human-readable, show progress      |
+    | -e ssh | transfer over ssh                           |
+    | -W     | whole file transfer (instead of diff based) |
+    |--------+---------------------------------------------|
+*** More options
+    |-----------------------+-----------------------------------------------------------|
+    | Option                | Used for                                                  |
+    |-----------------------+-----------------------------------------------------------|
+    | --dry-run, -n         | does not modify filesystem                                |
+    | --delete              | removes files (in remote) that does not exist at source   |
+    | --include="" --exclude="" | to specify which files to include/exclude                 |
+    | --exclude-from=file   | exclude glob patterns specified in a file                 |
+    |-----------------------+-----------------------------------------------------------|
+*** Common uses
+    - Full system backup [[https://www.linuxsecrets.com/archlinux-wiki/wiki.archlinux.org/index.php/Full_system_backup_with_rsync.html][(For more info]])
+      #+BEGIN_SRC bash
+      sudo rsync -aAXv \
+      --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*",\
+                 "/run/*","/mnt/*","/media/*","/lost+found"} \
+      / /path/to/backup/folder
+      #+END_SRC
+    - Backup remote folder using ssh
+      #+BEGIN_SRC bash
+      rsync -ave ssh /path/to/source/folder user@remote:~/backup/folder
+      #+END_SRC
+    - Incremental backup
+      #+BEGIN_SRC bash
+      rsync -arvhP --delete /path/to/source/folder /path/to/backup/folder
+      #+END_SRC

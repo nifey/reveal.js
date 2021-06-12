@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>ILUGC talks</title>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../../css/reveal.css"/>
+
+<link rel="stylesheet" href="../../css/theme/simple.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../../css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<section id="slide-orgd6200bf">
+<h2 id="orgd6200bf">RSync</h2>
+<div class="outline-text-2" id="text-orgd6200bf">
+</div>
+</section>
+</section>
+<section>
+<section id="slide-orge4c1bd0">
+<h3 id="orge4c1bd0">You need a backup</h3>
+<ul>
+<li>3-2-1 Backup Strategy
+<ul>
+<li>Your working copy</li>
+<li>Local backup (for quick access)</li>
+<li>Remote backup (if we lose both local copy)</li>
+
+</ul></li>
+<li>Set a system in place</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org1e8b43c">
+<h3 id="org1e8b43c">RSync</h3>
+<ul>
+<li>Written in C</li>
+<li>Supports Windows, Linux, OS X, BSD</li>
+<li>Multiple GUI Frontends available (GSync, QSync, Zynk, etc)</li>
+<li><p>
+General format
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-bash" ><code trim>rsync options /path/to/source/folder /path/to/backup/folder
+</code></pre>
+</div></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org8558e45">
+<h3 id="org8558e45">What's good?</h3>
+<ul>
+<li>Uses a diff based transfer algorithm to reduce bandwidth usage</li>
+<li>Works over SSH to backup remote files</li>
+<li>Good for unidirectional static backups</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org0a82dc0">
+<h3 id="org0a82dc0">What's not good?</h3>
+<ul>
+<li>Cannot be used easily for bi directional transfers
+<ul>
+<li>If you modify both copies simultaneously, try <a href="https://syncthing.net/">Syncthing</a> instead</li>
+
+</ul></li>
+<li>Moved and renamed files will be treated like new files and will be copied again. Some workarounds:
+<ul>
+<li>-y &#x2013;fuzzy option, detects renames within a directory</li>
+<li><a href="https://lincolnloop.com/blog/detecting-file-moves-renames-rsync/">Using hard links</a></li>
+
+</ul></li>
+<li>Diff based algorithm does not work well for compressed files</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org7960d74">
+<h3 id="org7960d74">Things to note</h3>
+<ul>
+<li><b>RSync has different behaviour with and without trailing backslash</b></li>
+<li>Databases need to be dumped to files for RSync to backup</li>
+<li>Can be automated using crontab or SystemD timers</li>
+<li>Always do a dry run before executing (especially with &#x2013;delete)</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org21fefff">
+<h3 id="org21fefff">Options</h3>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Option</th>
+<th scope="col" class="org-left">Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">-a</td>
+<td class="org-left">preserve user permissions, modified times</td>
+</tr>
+
+<tr>
+<td class="org-left">-r</td>
+<td class="org-left">to copy recursively</td>
+</tr>
+
+<tr>
+<td class="org-left">-z</td>
+<td class="org-left">transfers data in compressed format</td>
+</tr>
+
+<tr>
+<td class="org-left">-vhP</td>
+<td class="org-left">verbose, human-readable, show progress</td>
+</tr>
+
+<tr>
+<td class="org-left">-e ssh</td>
+<td class="org-left">transfer over ssh</td>
+</tr>
+
+<tr>
+<td class="org-left">-W</td>
+<td class="org-left">whole file transfer (instead of diff based)</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section>
+<section id="slide-orgfeee20f">
+<h3 id="orgfeee20f">More options</h3>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Option</th>
+<th scope="col" class="org-left">Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">&#x2013;dry-run, -n</td>
+<td class="org-left">does not modify filesystem</td>
+</tr>
+
+<tr>
+<td class="org-left">&#x2013;delete</td>
+<td class="org-left">removes files (in remote) that does not exist at source</td>
+</tr>
+
+<tr>
+<td class="org-left">&#x2013;include="" &#x2013;exclude=""</td>
+<td class="org-left">to specify which files to include/exclude</td>
+</tr>
+
+<tr>
+<td class="org-left">&#x2013;exclude-from=file</td>
+<td class="org-left">exclude glob patterns specified in a file</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section>
+<section id="slide-orgd993b5e">
+<h3 id="orgd993b5e">Common uses</h3>
+<ul>
+<li><p>
+Full system backup <a href="https://www.linuxsecrets.com/archlinux-wiki/wiki.archlinux.org/index.php/Full_system_backup_with_rsync.html">(For more info</a>)
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-bash" ><code trim>sudo rsync -aAXv <span style="color: #b8bb26;">\</span>
+--exclude=<span style="color: #458588;">{</span><span style="color: #b8bb26;">"/dev/*"</span>,<span style="color: #b8bb26;">"/proc/*"</span>,<span style="color: #b8bb26;">"/sys/*"</span>,<span style="color: #b8bb26;">"/tmp/*"</span>,<span style="color: #b8bb26;">\</span>
+           <span style="color: #b8bb26;">"/run/*"</span>,<span style="color: #b8bb26;">"/mnt/*"</span>,<span style="color: #b8bb26;">"/media/*"</span>,<span style="color: #b8bb26;">"/lost+found"</span><span style="color: #458588;">}</span> <span style="color: #b8bb26;">\</span>
+/ /path/to/backup/folder
+</code></pre>
+</div></li>
+<li><p>
+Backup remote folder using ssh
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-bash" ><code trim>rsync -ave ssh /path/to/source/folder user@remote:~/backup/folder
+</code></pre>
+</div></li>
+<li><p>
+Incremental backup
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-bash" ><code trim>rsync -arvhP --delete /path/to/source/folder /path/to/backup/folder
+</code></pre>
+</div></li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../../js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>
