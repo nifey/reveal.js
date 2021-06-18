@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Abstracts</title>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../../css/reveal.css"/>
+
+<link rel="stylesheet" href="../../css/theme/simple.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../../css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<section id="slide-orgfe3fc56">
+<h2 id="orgfe3fc56">Dead Page and Dead Block Predictors: Cleaning TLBs and Caches Together</h2>
+<p>
+HPCA 2021
+</p>
+
+<p>
+Chandrashis Mazumdar, Prachatos Mitra,
+</p>
+
+<p>
+Arkaprava Basu
+</p>
+
+<p>
+<code>IISc</code>
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org0419536">
+<h3 id="org0419536">Problem</h3>
+<div class="outline-text-3" id="text-org0419536">
+</div>
+</section>
+<section id="slide-orgb0427ee">
+<h4 id="orgb0427ee">Dead Blocks in LLC</h4>
+<ul>
+<li>Dead Block: cache block that has high dead time
+<ul>
+<li>Dead time: Time between last access and eviction</li>
+
+</ul></li>
+<li>Dead block prediction in LLC is an active area</li>
+<li>Dead block bypass (avoid loading in the Cache)
+<ul>
+<li>Creates space for other useful blocks</li>
+<li>Enables prefetching of blocks</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org5040586">
+<h4 id="org5040586">Dead pages</h4>
+<ul>
+<li>Dead pages: Dead entries in TLB</li>
+<li>The authors quantify the presence of dead pages in LLT</li>
+<li>82% of LLT entries can be dead pages (on average)</li>
+<li>86% of dead pages are Dead On Arrival (DOA)</li>
+<li>Challenge: TLBs are small (~11.75KB), so predictors should be smaller</li>
+
+</ul>
+</section>
+<section id="slide-org7e16441">
+<h4 id="org7e16441">Opportunities</h4>
+<ul>
+<li>They observe: 73% Dead blocks are often concentrated in DOA pages</li>
+<li>Utilize dead page information to predict dead blocks</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgbdafaa7">
+<h3 id="orgbdafaa7">Solution</h3>
+<ul>
+<li>Propose two predictors
+<ul>
+<li>Dead page predictor: dpPred</li>
+<li>Correlating Dead block predictor: cbPred</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org2e8caa9">
+<h4 id="org2e8caa9">Dead page predictor: dpPred</h4>
+<ul>
+<li>Adds Hash of PC (that brought the page) to LLT entries</li>
+<li>Uses a 2D table of 3 bit saturating counters</li>
+<li>Uses hash of PC (6 bits) and hash of VPN (4 bit) to index
+<ul>
+<li>Reduces storage overhead</li>
+
+</ul></li>
+<li>Also has a shadow table (acts like a Victim cache)
+<ul>
+<li>Used for negative feedback (wrong prediciton)</li>
+
+</ul></li>
+<li>Uses TLB accessed bits to identify DOA entries</li>
+
+</ul>
+</section>
+<section id="slide-org1197e58">
+<h4 id="org1197e58">dpPred</h4>
+
+<div id="org8499b73" class="figure">
+<p><img src="./images/deadpage1.png" alt="deadpage1.png" /> 
+</p>
+</div>
+</section>
+<section id="slide-org7ac1fdc">
+<h4 id="org7ac1fdc">Correlating Dead block predictor: cbPred</h4>
+<ul>
+<li>Adds DP (Dead Page) bit, accessed bit to cache block metadata</li>
+<li>PFN filter queue (PFQ) stores Physical Address of recent DOA pages</li>
+<li>Block history table to store confidence value</li>
+
+</ul>
+</section>
+<section id="slide-orgf85efe3">
+<h4 id="orgf85efe3">cbPred</h4>
+
+<div id="orgb07a87b" class="figure">
+<p><img src="./images/deadpage2.png" alt="deadpage2.png" /> 
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-orgd43c381">
+<h3 id="orgd43c381">Evaluation</h3>
+<ul>
+<li>Using Sniper x86 simulator</li>
+<li>On 14 memory intensive workloads</li>
+<li>Compare with existing Dead Block predictor SHiP</li>
+<li>When both predictors are used together
+<ul>
+<li>11 KB storage overhead</li>
+<li>IPC speedup of 8.3% on average</li>
+<li>LLT and LLC MPKI reduced by 9.65% and 4.24%</li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../../js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>
