@@ -373,3 +373,62 @@ Arkaprava Basu
       - 11 KB storage overhead
       - IPC speedup of 8.3% on average
       - LLT and LLC MPKI reduced by 9.65% and 4.24%
+
+** Improving GPU Multi-tenancy with Page Walk Stealing
+   HPCA 2021
+
+B. Pratheek, Neha Jawalkar,
+
+Arkaprava Basu
+
+~IISc~
+*** Research Problem
+**** GPU Multi tenancy
+    - GPU VM was designed for single address space
+    - GPUs on Cloud need multi tenancy for effective utilization
+    - Multi tenancy: Multiple kernels running simultaneously on GPU
+      - Spatial multiplexing
+    - Nvidia Volta introduced multi tenancy (MPS)
+**** Interference between kernels
+    - Due to shared L2 TLBs and Page Table Walkers
+    - Can cause delay in page walk latency
+    - Trades off fairness for throughput
+    - Static partitioning leads to under-utilization
+*** Contributions
+    1. Quantify the performance degradation due to interference
+    2. Propose page walk stealing to improve performance
+**** Performance study
+     - Study inference effects with two kernels
+     - Performance improves by 26% without L2 TLB interference
+     - Performance improves by 65% without L2 TLB and Walker interference
+     - Interference eliminated using simulator modification (for study)
+     - Observation: Congestion in page walkers causes performance degradation
+**** Dynamic Walk Stealing (DWS)
+     - Performs static partitioning of Walkers among kernels
+     - Allows page walk stealing if walker is idle
+       - Steals walk request from another tenent
+     - Adds 192 bits of metadata (for 2 tenants and 16 PT walkers)
+**** DWS
+     [[file:./images/dws.png]] 
+**** Dynamic Walk Stealing++ (DWS ++)
+     - Similar to DWS, but allows page walk stealing if the queue length
+       differs too much
+     - Provides a knob DIFF-THRESH for Fairness-Throughput trade off
+*** Evaluation
+    - Using GPGPU-sim
+    - Use combination of two kernels from
+      - Low, Medium and High TLB miss characteristics
+    - Compared with MASK (L2 TLB partitioning)
+    - DWS shows 15% weighted IPC speedup (on average)
+    - DWS++ has slightly lower weighted IPC speedup but is more fair
+**** Fairness metric
+     - Fairness of a combination
+       
+       fairness_c = min(S_a ,S_b )/max(S_a ,S_b )
+
+     - S_a = Slowdown of kernel a
+
+       S_a = IPC_Comb. (A) / IPC_SA (A)
+        
+     - Higher is better
+     - Ideal fairness = 1

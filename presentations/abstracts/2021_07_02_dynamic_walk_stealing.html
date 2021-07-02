@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Abstracts</title>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../../css/reveal.css"/>
+
+<link rel="stylesheet" href="../../css/theme/simple.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../../css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<section id="slide-org7490481">
+<h2 id="org7490481">Improving GPU Multi-tenancy with Page Walk Stealing</h2>
+<p>
+HPCA 2021
+</p>
+
+<p>
+B. Pratheek, Neha Jawalkar,
+</p>
+
+<p>
+Arkaprava Basu
+</p>
+
+<p>
+<code>IISc</code>
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org17401d6">
+<h3 id="org17401d6">Research Problem</h3>
+<div class="outline-text-3" id="text-org17401d6">
+</div>
+</section>
+<section id="slide-org864f991">
+<h4 id="org864f991">GPU Multi tenancy</h4>
+<ul>
+<li>GPU VM was designed for single address space</li>
+<li>GPUs on Cloud need multi tenancy for effective utilization</li>
+<li>Multi tenancy: Multiple kernels running simultaneously on GPU
+<ul>
+<li>Spatial multiplexing</li>
+
+</ul></li>
+<li>Nvidia Volta introduced multi tenancy (MPS)</li>
+
+</ul>
+</section>
+<section id="slide-org944ff5c">
+<h4 id="org944ff5c">Interference between kernels</h4>
+<ul>
+<li>Due to shared L2 TLBs and Page Table Walkers</li>
+<li>Can cause delay in page walk latency</li>
+<li>Trades off fairness for throughput</li>
+<li>Static partitioning leads to under-utilization</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgb1f834b">
+<h3 id="orgb1f834b">Contributions</h3>
+<ol>
+<li>Quantify the performance degradation due to interference</li>
+<li>Propose page walk stealing to improve performance</li>
+
+</ol>
+</section>
+<section id="slide-org32725c0">
+<h4 id="org32725c0">Performance study</h4>
+<ul>
+<li>Study inference effects with two kernels</li>
+<li>Performance improves by 26% without L2 TLB interference</li>
+<li>Performance improves by 65% without L2 TLB and Walker interference</li>
+<li>Interference eliminated using simulator modification (for study)</li>
+<li>Observation: Congestion in page walkers causes performance degradation</li>
+
+</ul>
+</section>
+<section id="slide-org5daa16b">
+<h4 id="org5daa16b">Dynamic Walk Stealing (DWS)</h4>
+<ul>
+<li>Performs static partitioning of Walkers among kernels</li>
+<li>Allows page walk stealing if walker is idle
+<ul>
+<li>Steals walk request from another tenent</li>
+
+</ul></li>
+<li>Adds 192 bits of metadata (for 2 tenants and 16 PT walkers)</li>
+
+</ul>
+</section>
+<section id="slide-orgcc4f7af">
+<h4 id="orgcc4f7af">DWS</h4>
+
+<div id="org600fff0" class="figure">
+<p><img src="./images/dws.png" alt="dws.png" /> 
+</p>
+</div>
+</section>
+<section id="slide-org6858ca9">
+<h4 id="org6858ca9">Dynamic Walk Stealing++ (DWS ++)</h4>
+<ul>
+<li>Similar to DWS, but allows page walk stealing if the queue length
+differs too much</li>
+<li>Provides a knob DIFF-THRESH for Fairness-Throughput trade off</li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgc4815ab">
+<h3 id="orgc4815ab">Evaluation</h3>
+<ul>
+<li>Using GPGPU-sim</li>
+<li>Use combination of two kernels from
+<ul>
+<li>Low, Medium and High TLB miss characteristics</li>
+
+</ul></li>
+<li>Compared with MASK (L2 TLB partitioning)</li>
+<li>DWS shows 15% weighted IPC speedup (on average)</li>
+<li>DWS++ has slightly lower weighted IPC speedup but is more fair</li>
+
+</ul>
+</section>
+<section id="slide-org444d8bd">
+<h4 id="org444d8bd">Fairness metric</h4>
+<ul>
+<li><p>
+Fairness of a combination
+</p>
+
+<p>
+fairness<sub>c</sub> = min(S<sub>a</sub> ,S<sub>b</sub> )/max(S<sub>a</sub> ,S<sub>b</sub> )
+</p></li>
+
+<li><p>
+S<sub>a</sub> = Slowdown of kernel a
+</p>
+
+<p>
+S<sub>a</sub> = IPC<sub>Comb</sub>. (A) / IPC<sub>SA</sub> (A)
+</p></li>
+
+<li>Higher is better</li>
+<li>Ideal fairness = 1</li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../../js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>
