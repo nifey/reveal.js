@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Abstracts</title>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../../css/reveal.css"/>
+
+<link rel="stylesheet" href="../../css/theme/simple.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../../css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<section id="slide-org69d2357">
+<h2 id="org69d2357">GradPIM: A Practical Processing-in-DRAM Architecture for Gradient Descent</h2>
+<p>
+HPCA 2021
+</p>
+
+
+<div id="org7cbd932" class="figure">
+<p><img src="./images/gradpim_authors.png" alt="gradpim_authors.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org81f7329">
+<h3 id="org81f7329">Background</h3>
+<div class="outline-text-3" id="text-org81f7329">
+</div>
+</section>
+<section id="slide-org7785dc5">
+<h4 id="org7785dc5">Processing In Memory (PIM) Architectures</h4>
+<ul>
+<li>Add logic components to DRAM die</li>
+<li>Reduces memory migration</li>
+<li>Moves compute to memory</li>
+<li>Challenges of adopting
+<ol>
+<li>Needs ISA changes</li>
+<li>Needs new DRAM commands</li>
+<li>Changes in Memory controller</li>
+
+</ol></li>
+
+</ul>
+</section>
+<section id="slide-orge71fd09">
+<h4 id="orge71fd09">Practical PIM solution</h4>
+<ul>
+<li>Fixed function PIM</li>
+<li>Deterministic latency</li>
+<li>Works well with DDR timing</li>
+<li>Simple and Memory intensive PIM function</li>
+<li>Isolation of PIM components and Cell array</li>
+
+</ul>
+</section>
+<section id="slide-org035e98a">
+<h4 id="org035e98a">Neural Processing Units (NPUs)</h4>
+<ul>
+<li>Used to accelerate DNN training</li>
+<li>DNNs -&gt; data reuse -&gt; high memory traffic</li>
+<li>Opportunities
+<ul>
+<li>PIMs easy to adopt in NPU (than CPU)</li>
+<li>Parameter update phase
+<ul>
+<li>Simple and memory intensive</li>
+<li>A good function for PIM</li>
+
+</ul></li>
+
+</ul></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-orgd374b88">
+<h3 id="orgd374b88">GradPIM</h3>
+<ul>
+<li>PIM for Gradient Descent (SGD with momentum and weight decay)</li>
+<li>Works with DDR4 SDRAM</li>
+<li>Uses Bank group parallelism
+<ul>
+<li>Decouple bank group I/O gating from global I/O gating</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org1d551b1">
+<h4 id="org1d551b1">Bank group parallelism</h4>
+
+<div id="org1eab3c2" class="figure">
+<p><img src="./images/gradpim1.png" alt="gradpim1.png" /> 
+</p>
+</div>
+</section>
+<section id="slide-orge8d1ade">
+<h4 id="orge8d1ade">GradPIM</h4>
+
+<div id="org8e3a2a1" class="figure">
+<p><img src="./images/gradpim2.png" alt="gradpim2.png" /> 
+</p>
+</div>
+</section>
+<section id="slide-org72d888e">
+<h4 id="org72d888e">Data placement</h4>
+<ul>
+<li>No interleaving between DRAM chips</li>
+<li>For vector operations, corresponding elements
+<ul>
+<li>in same bank group</li>
+<li>in different banks</li>
+
+</ul></li>
+
+</ul>
+
+<div id="org2405f56" class="figure">
+<p><img src="./images/gradpim3.png" alt="gradpim3.png" /> 
+</p>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org1ad681a">
+<h3 id="org1ad681a">Evaluation</h3>
+<ul>
+<li>Using SystemC NPU simulator + DRAMSim 3</li>
+<li>Speeds up parameter update phase by 8x</li>
+<li>Overall performance speedup is 1.94x</li>
+<li>Negligible area overhead on DRAM</li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../../js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+
+
+</script>
+</body>
+</html>

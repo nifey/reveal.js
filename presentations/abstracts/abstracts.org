@@ -432,3 +432,52 @@ Arkaprava Basu
         
      - Higher is better
      - Ideal fairness = 1
+
+** GradPIM: A Practical Processing-in-DRAM Architecture for Gradient Descent
+   HPCA 2021
+
+   [[file:./images/gradpim_authors.png]]
+
+*** Background
+**** Processing In Memory (PIM) Architectures
+     - Add logic components to DRAM die
+     - Reduces memory migration
+     - Moves compute to memory
+     - Challenges of adopting
+       1. Needs ISA changes
+       2. Needs new DRAM commands
+       3. Changes in Memory controller
+**** Practical PIM solution
+     - Fixed function PIM
+     - Deterministic latency
+     - Works well with DDR timing
+     - Simple and Memory intensive PIM function
+     - Isolation of PIM components and Cell array
+**** Neural Processing Units (NPUs)
+    - Used to accelerate DNN training
+    - DNNs -> data reuse -> high memory traffic
+    - Opportunities
+      - PIMs easy to adopt in NPU (than CPU)
+      - Parameter update phase
+        - Simple and memory intensive
+        - A good function for PIM
+*** GradPIM
+    - PIM for Gradient Descent (SGD with momentum and weight decay)
+    - Works with DDR4 SDRAM
+    - Uses Bank group parallelism
+      - Decouple bank group I/O gating from global I/O gating
+**** Bank group parallelism
+     [[file:./images/gradpim1.png]] 
+**** GradPIM
+     [[file:./images/gradpim2.png]] 
+**** Data placement
+     - No interleaving between DRAM chips
+     - For vector operations, corresponding elements
+       - in same bank group
+       - in different banks
+     [[file:./images/gradpim3.png]] 
+*** Evaluation
+    - Using SystemC NPU simulator + DRAMSim 3
+    - Speeds up parameter update phase by 8x
+    - Overall performance speedup is 1.94x
+    - Negligible area overhead on DRAM
